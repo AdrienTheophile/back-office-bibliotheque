@@ -19,6 +19,14 @@ class Emprunt
     #[ORM\Column]
     private ?\DateTime $dateRetour = null;
 
+    #[ORM\ManyToOne(inversedBy: 'emprunts')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Adherent $adherent = null;
+
+    #[ORM\ManyToOne(inversedBy: 'emprunts')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Livre $livre = null;
+
     public function getId(): ?int
     {
         return $this->idEmp;
@@ -44,6 +52,30 @@ class Emprunt
     public function setDateRetour(\DateTime $dateRetour): static
     {
         $this->dateRetour = $dateRetour;
+
+        return $this;
+    }
+
+    public function getAdherent(): ?Adherent
+    {
+        return $this->adherent;
+    }
+
+    public function setAdherent(?Adherent $adherent): static
+    {
+        $this->adherent = $adherent;
+
+        return $this;
+    }
+
+    public function getLivre(): ?Livre
+    {
+        return $this->livre;
+    }
+
+    public function setLivre(?Livre $livre): static
+    {
+        $this->livre = $livre;
 
         return $this;
     }
