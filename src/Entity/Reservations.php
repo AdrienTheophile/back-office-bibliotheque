@@ -17,7 +17,7 @@ class Reservations
     private ?\DateTime $dateResa = null;
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, referencedColumnName: 'id_adh')]
     private ?Adherent $adherent = null;
 
     #[ORM\OneToOne(inversedBy: 'reservations', cascade: ['persist', 'remove'])]

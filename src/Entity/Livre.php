@@ -40,12 +40,20 @@ class Livre
      * @var Collection<int, Auteur>
      */
     #[ORM\ManyToMany(targetEntity: Auteur::class, inversedBy: 'livres')]
+    #[ORM\JoinTable(
+        name: 'livre_auteur',
+        inverseJoinColumns: [new ORM\JoinColumn(name: 'auteur_id', referencedColumnName: 'id_aut')]
+    )]
     private Collection $auteurs;
 
     /**
      * @var Collection<int, Categorie>
      */
     #[ORM\ManyToMany(targetEntity: Categorie::class, inversedBy: 'livres')]
+    #[ORM\JoinTable(
+        name: 'livre_categorie',
+        inverseJoinColumns: [new ORM\JoinColumn(name: 'categorie_id', referencedColumnName: 'id_cat')]
+    )]
     private Collection $categories;
 
     public function __construct()

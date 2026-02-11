@@ -20,7 +20,7 @@ class Emprunt
     private ?\DateTime $dateRetour = null;
 
     #[ORM\ManyToOne(inversedBy: 'emprunts')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, referencedColumnName: 'id_adh')]
     private ?Adherent $adherent = null;
 
     #[ORM\ManyToOne(inversedBy: 'emprunts')]
