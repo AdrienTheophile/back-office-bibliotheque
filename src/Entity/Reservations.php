@@ -24,7 +24,7 @@ class Reservations
     #[ORM\JoinColumn(nullable: false, referencedColumnName: 'id_livre')]
     private ?Livre $livre = null;
 
-    public function getId(): ?int
+    public function getIdResa(): ?int
     {
         return $this->idResa;
     }

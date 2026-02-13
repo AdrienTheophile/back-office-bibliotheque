@@ -48,7 +48,7 @@ class Auteur
         $this->livres = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getIdAut(): ?int
     {
         return $this->idAut;
     }

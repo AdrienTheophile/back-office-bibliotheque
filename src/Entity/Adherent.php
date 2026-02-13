@@ -58,7 +58,7 @@ class Adherent
         $this->emprunts = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getIdAdh(): ?int
     {
         return $this->idAdh;
     }

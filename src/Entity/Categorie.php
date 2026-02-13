@@ -33,7 +33,7 @@ class Categorie
         $this->livres = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getIdCat(): ?int
     {
         return $this->idCat;
     }

@@ -27,7 +27,7 @@ class Emprunt
     #[ORM\JoinColumn(nullable: false, referencedColumnName: 'id_livre')]
     private ?Livre $livre = null;
 
-    public function getId(): ?int
+    public function getIdEmp(): ?int
     {
         return $this->idEmp;
     }

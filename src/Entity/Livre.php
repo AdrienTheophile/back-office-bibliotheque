@@ -65,7 +65,7 @@ class Livre
         $this->categories = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getIdLivre(): ?int
     {
         return $this->idLivre;
     }
