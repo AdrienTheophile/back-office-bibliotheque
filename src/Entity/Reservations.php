@@ -11,7 +11,7 @@ class Reservations
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private ?int $idResa = null;
 
     #[ORM\Column]
     private ?\DateTime $dateResa = null;
@@ -21,12 +21,12 @@ class Reservations
     private ?Adherent $adherent = null;
 
     #[ORM\OneToOne(inversedBy: 'reservations', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, referencedColumnName: 'id_livre')]
     private ?Livre $livre = null;
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->idResa;
     }
 
     public function getDateResa(): ?\DateTime

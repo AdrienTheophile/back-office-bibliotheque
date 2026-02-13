@@ -24,7 +24,7 @@ class Emprunt
     private ?Adherent $adherent = null;
 
     #[ORM\ManyToOne(inversedBy: 'emprunts')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, referencedColumnName: 'id_livre')]
     private ?Livre $livre = null;
 
     public function getId(): ?int

@@ -13,7 +13,7 @@ class Livre
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private ?int $idLivre = null;
 
     #[ORM\Column(length: 255)]
     private ?string $titre = null;
@@ -42,6 +42,7 @@ class Livre
     #[ORM\ManyToMany(targetEntity: Auteur::class, inversedBy: 'livres')]
     #[ORM\JoinTable(
         name: 'livre_auteur',
+        joinColumns: [new ORM\JoinColumn(name: 'livre_id', referencedColumnName: 'id_livre')],
         inverseJoinColumns: [new ORM\JoinColumn(name: 'auteur_id', referencedColumnName: 'id_aut')]
     )]
     private Collection $auteurs;
@@ -52,6 +53,7 @@ class Livre
     #[ORM\ManyToMany(targetEntity: Categorie::class, inversedBy: 'livres')]
     #[ORM\JoinTable(
         name: 'livre_categorie',
+        joinColumns: [new ORM\JoinColumn(name: 'livre_id', referencedColumnName: 'id_livre')],
         inverseJoinColumns: [new ORM\JoinColumn(name: 'categorie_id', referencedColumnName: 'id_cat')]
     )]
     private Collection $categories;
@@ -65,7 +67,7 @@ class Livre
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->idLivre;
     }
 
     public function getTitre(): ?string

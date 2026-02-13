@@ -1,0 +1,69 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Tableau de bord - Bibliothèque
+{% endblock %}
+
+{% block content_header %}
+	<h1>Tableau de bord</h1>
+{% endblock %}
+
+{% block main %}
+	<div class="container mt-4">
+		<div class="row">
+			<div class="col-md-3">
+				<div class="card text-white bg-primary mb-3">
+					<div class="card-header">Adhérents</div>
+					<div class="card-body">
+						<h5 class="card-title">{{ nbAdherents }}</h5>
+						<p class="card-text">Nombre total d'adhérents</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card text-white bg-secondary mb-3">
+					<div class="card-header">Auteurs</div>
+					<div class="card-body">
+						<h5 class="card-title">{{ nbAuteurs }}</h5>
+						<p class="card-text">Nombre total d'auteurs</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card text-white bg-success mb-3">
+					<div class="card-header">Catégories</div>
+					<div class="card-body">
+						<h5 class="card-title">{{ nbCategories }}</h5>
+						<p class="card-text">Nombre total de catégories</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card text-white bg-info mb-3">
+					<div class="card-header">Emprunts</div>
+					<div class="card-body">
+						<h5 class="card-title">{{ nbEmprunts }}</h5>
+						<p class="card-text">Nombre total d'emprunts</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card text-white bg-warning mb-3">
+					<div class="card-header">Livres</div>
+					<div class="card-body">
+						<h5 class="card-title">{{ nbLivres }}</h5>
+						<p class="card-text">Nombre total de livres</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card text-white bg-danger mb-3">
+					<div class="card-header">Réservations</div>
+					<div class="card-body">
+						<h5 class="card-title">{{ nbReservations }}</h5>
+						<p class="card-text">Nombre total de réservations</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

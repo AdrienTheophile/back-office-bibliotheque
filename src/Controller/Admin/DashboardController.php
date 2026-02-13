@@ -2,6 +2,13 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Adherent;
+use App\Entity\Auteur;
+use App\Entity\Categorie;
+use App\Entity\Emprunt;
+use App\Entity\Livre;
+use App\Entity\Reservations;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -11,29 +18,27 @@ use Symfony\Component\HttpFoundation\Response;
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 class DashboardController extends AbstractDashboardController
 {
+    public function __construct(private EntityManagerInterface $em)
+    {
+    }
+
     public function index(): Response
     {
-        return parent::index();
+        $nbAdherents = $this->em->getRepository(Adherent::class)->count([]);
+        $nbAuteurs = $this->em->getRepository(Auteur::class)->count([]);
+        $nbCategories = $this->em->getRepository(Categorie::class)->count([]);
+        $nbEmprunts = $this->em->getRepository(Emprunt::class)->count([]);
+        $nbLivres = $this->em->getRepository(Livre::class)->count([]);
+        $nbReservations = $this->em->getRepository(Reservations::class)->count([]);
 
-        // Option 1. You can make your dashboard redirect to some common page of your backend
-        //
-        // 1.1) If you have enabled the "pretty URLs" feature:
-        // return $this->redirectToRoute('admin_user_index');
-        //
-        // 1.2) Same example but using the "ugly URLs" that were used in previous EasyAdmin versions:
-        // $adminUrlGenerator = $this->container->get(AdminUrlGenerator::class);
-        // return $this->redirect($adminUrlGenerator->setController(OneOfYourCrudController::class)->generateUrl());
-
-        // Option 2. You can make your dashboard redirect to different pages depending on the user
-        //
-        // if ('jane' === $this->getUser()->getUsername()) {
-        //     return $this->redirectToRoute('...');
-        // }
-
-        // Option 3. You can render some custom template to display a proper dashboard with widgets, etc.
-        // (tip: it's easier if your template extends from @EasyAdmin/page/content.html.twig)
-        //
-        // return $this->render('some/path/my-dashboard.html.twig');
+        return $this->render('admin/dashboard.html.twig', [
+            'nbAdherents' => $nbAdherents,
+            'nbAuteurs' => $nbAuteurs,
+            'nbCategories' => $nbCategories,
+            'nbEmprunts' => $nbEmprunts,
+            'nbLivres' => $nbLivres,
+            'nbReservations' => $nbReservations,
+        ]);
     }
 
     public function configureDashboard(): Dashboard
@@ -45,6 +50,16 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
-        // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
+        
+        yield MenuItem::linkToCrud('Adhérents', 'fa fa-users', Adherent::class);
+
+        yield MenuItem::section('Catalogue');
+        yield MenuItem::linkToCrud('Livres', 'fa fa-book', Livre::class);
+        yield MenuItem::linkToCrud('Auteurs', 'fa fa-pen-fancy', Auteur::class);
+        yield MenuItem::linkToCrud('Catégories', 'fa fa-tags', Categorie::class);
+
+        yield MenuItem::section('Gestion');
+        yield MenuItem::linkToCrud('Emprunts', 'fa fa-handshake', Emprunt::class);
+        yield MenuItem::linkToCrud('Réservations', 'fa fa-calendar-check', Reservations::class);
     }
 }
