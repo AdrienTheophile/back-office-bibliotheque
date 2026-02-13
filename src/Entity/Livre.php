@@ -6,6 +6,7 @@ use App\Repository\LivreRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: LivreRepository::class)]
 class Livre
@@ -13,18 +14,23 @@ class Livre
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['livre:read', 'auteur:read', 'categorie:read', 'emprunt:read', 'reservation:read'])]
     private ?int $idLivre = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['livre:read', 'auteur:read', 'categorie:read', 'emprunt:read', 'reservation:read'])]
     private ?string $titre = null;
 
     #[ORM\Column]
+    #[Groups(['livre:read'])]
     private ?\DateTime $dateSortie = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['livre:read'])]
     private ?string $langue = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['livre:read'])]
     private ?string $photoCouverture = null;
 
     #[ORM\OneToOne(mappedBy: 'livre', cascade: ['persist', 'remove'])]
@@ -45,6 +51,7 @@ class Livre
         joinColumns: [new ORM\JoinColumn(name: 'livre_id', referencedColumnName: 'id_livre')],
         inverseJoinColumns: [new ORM\JoinColumn(name: 'auteur_id', referencedColumnName: 'id_aut')]
     )]
+    #[Groups(['livre:read'])]
     private Collection $auteurs;
 
     /**
@@ -56,6 +63,7 @@ class Livre
         joinColumns: [new ORM\JoinColumn(name: 'livre_id', referencedColumnName: 'id_livre')],
         inverseJoinColumns: [new ORM\JoinColumn(name: 'categorie_id', referencedColumnName: 'id_cat')]
     )]
+    #[Groups(['livre:read'])]
     private Collection $categories;
 
     public function __construct()

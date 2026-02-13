@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\EmpruntRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: EmpruntRepository::class)]
 class Emprunt
@@ -11,12 +12,15 @@ class Emprunt
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['emprunt:read', 'adherent:read'])]
     private ?int $idEmp = null;
 
     #[ORM\Column]
+    #[Groups(['emprunt:read', 'adherent:read'])]
     private ?\DateTime $dateEmprunt = null;
 
     #[ORM\Column]
+    #[Groups(['emprunt:read', 'adherent:read'])]
     private ?\DateTime $dateRetour = null;
 
     #[ORM\ManyToOne(inversedBy: 'emprunts')]
@@ -25,6 +29,7 @@ class Emprunt
 
     #[ORM\ManyToOne(inversedBy: 'emprunts')]
     #[ORM\JoinColumn(nullable: false, referencedColumnName: 'id_livre')]
+    #[Groups(['emprunt:read', 'adherent:read'])]
     private ?Livre $livre = null;
 
     public function getIdEmp(): ?int

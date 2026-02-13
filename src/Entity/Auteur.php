@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AuteurRepository::class)]
 class Auteur
@@ -14,33 +15,42 @@ class Auteur
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['auteur:read', 'livre:read'])]
     private ?int $idAut = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['auteur:read', 'livre:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['auteur:read', 'livre:read'])]
     private ?string $prenom = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['auteur:read'])]
     private ?\DateTime $dateNaissance = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['auteur:read'])]
     private ?\DateTime $dateDeces = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['auteur:read'])]
     private ?string $nationalite = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['auteur:read'])]
     private ?string $photo = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['auteur:read'])]
     private ?string $description = null;
 
     /**
      * @var Collection<int, Livre>
      */
     #[ORM\ManyToMany(targetEntity: Livre::class, mappedBy: 'auteurs')]
+    #[Groups(['auteur:read'])]
     private Collection $livres;
 
     public function __construct()

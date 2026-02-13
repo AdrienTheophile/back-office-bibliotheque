@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AdherentRepository::class)]
 class Adherent
@@ -14,27 +15,35 @@ class Adherent
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['adherent:read'])]
     private ?int $idAdh = null;
 
     #[ORM\Column]
+    #[Groups(['adherent:read'])]
     private ?\DateTime $dateAdhesion = null;
 
     #[ORM\Column(length: 100)]
+    #[Groups(['adherent:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 100)]
+    #[Groups(['adherent:read'])]
     private ?string $prenom = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['adherent:read'])]
     private ?\DateTime $dateNaiss = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['adherent:read'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['adherent:read'])]
     private ?string $adressePostale = null;
 
     #[ORM\Column(length: 13)]
+    #[Groups(['adherent:read'])]
     private ?string $numTel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -44,12 +53,14 @@ class Adherent
      * @var Collection<int, Reservations>
      */
     #[ORM\OneToMany(targetEntity: Reservations::class, mappedBy: 'adherent')]
+    #[Groups(['adherent:read'])]
     private Collection $reservations;
 
     /**
      * @var Collection<int, Emprunt>
      */
     #[ORM\OneToMany(targetEntity: Emprunt::class, mappedBy: 'adherent')]
+    #[Groups(['adherent:read'])]
     private Collection $emprunts;
 
     public function __construct()
