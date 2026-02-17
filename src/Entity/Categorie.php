@@ -38,6 +38,11 @@ class Categorie
         $this->livres = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->nom ?? '';
+    }
+
     public function getIdCat(): ?int
     {
         return $this->idCat;

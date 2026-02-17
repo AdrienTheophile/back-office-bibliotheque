@@ -69,6 +69,11 @@ class Adherent
         $this->emprunts = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->prenom . ' ' . $this->nom;
+    }
+
     public function getIdAdh(): ?int
     {
         return $this->idAdh;

@@ -58,6 +58,11 @@ class Auteur
         $this->livres = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->prenom . ' ' . $this->nom;
+    }
+
     public function getIdAut(): ?int
     {
         return $this->idAut;

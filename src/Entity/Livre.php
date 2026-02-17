@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: LivreRepository::class)]
 class Livre
@@ -64,6 +65,7 @@ class Livre
         inverseJoinColumns: [new ORM\JoinColumn(name: 'categorie_id', referencedColumnName: 'id_cat')]
     )]
     #[Groups(['livre:read'])]
+    #[Assert\Count(min: 1, max: 3)]
     private Collection $categories;
 
     public function __construct()
@@ -71,6 +73,11 @@ class Livre
         $this->emprunts = new ArrayCollection();
         $this->auteurs = new ArrayCollection();
         $this->categories = new ArrayCollection();
+    }
+
+    public function __toString(): string
+    {
+        return $this->titre ?? '';
     }
 
     public function getIdLivre(): ?int

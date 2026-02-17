@@ -19,7 +19,7 @@ class AuteurCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id')->hideOnForm(),
+            IdField::new('idAut', 'ID')->hideOnForm(),
             TextField::new('nom'),
             TextField::new('prenom'),
             DateField::new('dateNaissance'),

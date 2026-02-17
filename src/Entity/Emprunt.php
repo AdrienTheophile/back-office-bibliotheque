@@ -32,6 +32,24 @@ class Emprunt
     #[Groups(['emprunt:read', 'adherent:read'])]
     private ?Livre $livre = null;
 
+    // Représente les livres sélectionnés pour le formulaire EasyAdmin (sélection multiple)
+    private ?array $livresEmpruntes = [];
+
+    public function getLivresEmpruntes(): ?array
+    {
+        return $this->livresEmpruntes;
+    }
+
+    public function setLivresEmpruntes($livres): self
+    {
+        if ($livres instanceof \Doctrine\Common\Collections\Collection) {
+            $this->livresEmpruntes = $livres->toArray();
+        } else {
+            $this->livresEmpruntes = $livres;
+        }
+        return $this;
+    }
+
     public function getIdEmp(): ?int
     {
         return $this->idEmp;
