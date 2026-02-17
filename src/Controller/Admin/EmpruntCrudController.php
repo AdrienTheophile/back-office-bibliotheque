@@ -6,9 +6,18 @@ use App\Entity\Emprunt;
 use App\Repository\EmpruntRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use Doctrine\ORM\QueryBuilder;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 class EmpruntCrudController extends AbstractCrudController
 {
@@ -22,26 +31,124 @@ class EmpruntCrudController extends AbstractCrudController
         return Emprunt::class;
     }
 
+    public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
+    {
+        $qb = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
+        
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        if (!$request) {
+            return $qb;
+        }
+
+        $status = $request->query->get('status');
+
+        if ($status === 'en_cours') {
+            $qb->andWhere('entity.dateRetourReel IS NULL');
+        } elseif ($status === 'rendus') {
+            $qb->andWhere('entity.dateRetourReel IS NOT NULL');
+        } elseif ($status === 'retard') {
+            $qb->andWhere('entity.dateRetourReel IS NULL')
+               ->andWhere('entity.dateRetour < :now')
+               ->setParameter('now', new \DateTime());
+        }
+
+        return $qb;
+    }
+
+    public function configureActions(\EasyCorp\Bundle\EasyAdminBundle\Config\Actions $actions): \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
+    {
+        // Action existante pour marquer comme rendu
+        $returnBook = \EasyCorp\Bundle\EasyAdminBundle\Config\Action::new('returnBook', 'Marquer comme rendu', 'fa fa-check')
+            ->linkToCrudAction('rendreLivre')
+            ->displayIf(static function ($entity) {
+                return $entity->getDateRetourReel() === null;
+            });
+
+        // Boutons de filtres
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        if (!$request) {
+            return $actions->add(Crud::PAGE_INDEX, $returnBook);
+        }
+
+        $currentStatus = $request->query->get('status');
+        $urlGenerator = $this->container->get(AdminUrlGenerator::class);
+
+        // Bouton TOUT
+        $urlTout = $urlGenerator->setController(self::class)->setAction(Action::INDEX)->unset('status')->generateUrl();
+        $btnTout = Action::new('filterTout', 'Tout afficher')
+            ->createAsGlobalAction()
+            ->linkToUrl($urlTout)
+            ->setCssClass(!$currentStatus ? 'btn btn-dark' : 'btn btn-light');
+
+        // Bouton EN COURS
+        $urlEnCours = $urlGenerator->setController(self::class)->setAction(Action::INDEX)->set('status', 'en_cours')->generateUrl();
+        $btnEnCours = Action::new('filterEnCours', 'En cours')
+            ->createAsGlobalAction()
+            ->linkToUrl($urlEnCours)
+            ->setCssClass($currentStatus === 'en_cours' ? 'btn btn-dark' : 'btn btn-light');
+
+        // Bouton RETARDS
+        $urlRetard = $urlGenerator->setController(self::class)->setAction(Action::INDEX)->set('status', 'retard')->generateUrl();
+        $btnRetard = Action::new('filterRetard', 'En retard')
+            ->createAsGlobalAction()
+            ->linkToUrl($urlRetard)
+            ->setCssClass($currentStatus === 'retard' ? 'btn btn-danger' : 'btn btn-light');
+            
+        // Bouton RENDUS
+        $urlRendus = $urlGenerator->setController(self::class)->setAction(Action::INDEX)->set('status', 'rendus')->generateUrl();
+        $btnRendus = Action::new('filterRendus', 'Terminés')
+            ->createAsGlobalAction()
+            ->linkToUrl($urlRendus)
+            ->setCssClass($currentStatus === 'rendus' ? 'btn btn-dark' : 'btn btn-light');
+
+        return $actions
+            ->add(Crud::PAGE_INDEX, $returnBook)
+            ->add(Crud::PAGE_INDEX, $btnTout)
+            ->add(Crud::PAGE_INDEX, $btnEnCours)
+            ->add(Crud::PAGE_INDEX, $btnRetard)
+            ->add(Crud::PAGE_INDEX, $btnRendus);
+    }
+
+    public function rendreLivre(\EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext $context, EntityManagerInterface $entityManager): \Symfony\Component\HttpFoundation\Response
+    {
+        $id = $context->getRequest()->query->get('entityId');
+        $emprunt = $entityManager->getRepository(Emprunt::class)->find($id);
+
+        if (!$emprunt) {
+            throw $this->createNotFoundException('Emprunt non trouvé');
+        }
+
+        $emprunt->setDateRetourReel(new \DateTime());
+        
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Le livre a été marqué comme rendu.');
+
+        $url = $this->container->get(\EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator::class)
+            ->setController(self::class)
+            ->setAction(\EasyCorp\Bundle\EasyAdminBundle\Config\Action::INDEX)
+            ->generateUrl();
+
+        return $this->redirect($url);
+    }
+
     public function configureFields(string $pageName): iterable
     {
-        // Récupérer les IDs des livres non disponibles pour filtrer le champ
-        $unavailableIds = $this->empruntRepository->findLivreNotAvailable();
 
-        // Récupérer tous les livres disponibles (non empruntés)
+        // Récupérer tous les livres disponibles 
         $livresDisponibles = $this->empruntRepository->findAvailableLivres();
         
         // Créer un tableau [titre => objet Livre] pour le ChoiceField
         $choixLivres = [];
         foreach ($livresDisponibles as $livre) {
             $titre = $livre->getTitre();
-            // Gestion basique des doublons de titres
             if (array_key_exists($titre, $choixLivres)) {
                 $titre .= ' (ID: ' . $livre->getIdLivre() . ')';
             }
             $choixLivres[$titre] = $livre;
         }
 
-        // Champ pour la création (sélection multiple)
+        // selection de
         $livresField = \EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField::new('livresEmpruntes', 'Livres à emprunter')
             ->setChoices($choixLivres)
             ->allowMultipleChoices()
@@ -52,33 +159,42 @@ class EmpruntCrudController extends AbstractCrudController
         return [
             IdField::new('idEmp', 'ID')->hideOnForm(),
             AssociationField::new('adherent', 'Adhérent'),
-            
-            // Champ standard (affichage/édition)
             AssociationField::new('livre')
-                ->hideOnForm() // On le cache à la création car on utilise la sélection multiple
+                ->hideOnForm() 
                 ->setLabel('Livre'),
 
-            // Notre champ multiple (création seulement)
+            // champ multiple pour remplacer le champ de livre de base 
             $livresField,
 
             DateField::new('dateEmprunt', "Date d'emprunt")->setFormTypeOption('data', new \DateTime()),
-            DateField::new('dateRetour', 'Date de retour')->setFormTypeOption('data', new \DateTime('+30 days')),
+            DateField::new('dateRetour', 'Date limite retour')->setFormTypeOption('data', new \DateTime('+15 days')), //15 jours avant de considerer comme un retard
+            
+            DateField::new('dateRetourReel', 'Date de retour effectif')
+                ->setFormat('dd/MM/yyyy')
+                ->hideOnForm(), // On gère le retour via une action, ou on l'affiche seulement en lecture
+
+            BooleanField::new('enRetard', 'En retard')
+                ->renderAsSwitch(false)
+                ->hideOnForm(),
         ];
+    }
+
+    public function configureFilters(\EasyCorp\Bundle\EasyAdminBundle\Config\Filters $filters): \EasyCorp\Bundle\EasyAdminBundle\Config\Filters 
+    {
+        return $filters
+            ->add('adherent')
+            ->add('dateEmprunt')
+            ->add('dateRetour')
+            ->add('dateRetourReel');
     }
 
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        /** @var Emprunt $entityInstance */
+        
         $adherent = $entityInstance->getAdherent();
         $livresSelectionnes = $entityInstance->getLivresEmpruntes();
 
-        // Si on n'a pas sélectionné de livres (cas rare si required=true), on laisse faire EasyAdmin qui plantera
-        if (empty($livresSelectionnes)) {
-            parent::persistEntity($entityManager, $entityInstance);
-            return;
-        }
-
-        // Vérification limite de 5 emprunts
+        // Vérification limite de 5 emprunts en simultanés
         $activeCount = $this->empruntRepository->countEmpruntByAdherent($adherent);
         $totalTarget = $activeCount + count($livresSelectionnes);
 
@@ -89,19 +205,20 @@ class EmpruntCrudController extends AbstractCrudController
                 $activeCount,
                 count($livresSelectionnes)
             ));
-            // On ne persiste rien
-            return;
+            
+            return; //dans ce cas on ne change rien 
         }
 
         // Création des emprunts
-        // 1. Le premier livre est assigné à l'entité courante ($entityInstance) gérée par EasyAdmin
+
+        // 1er livre assigné à l'entité ($entityInstance) d'EasyAdmin
         $premierLivre = array_shift($livresSelectionnes);
         $entityInstance->setLivre($premierLivre);
         
         // On persiste l'entité principale
         parent::persistEntity($entityManager, $entityInstance);
 
-        // 2. On crée manuellement les autres emprunts
+        // on crée les autres emprunts
         foreach ($livresSelectionnes as $autreLivre) {
             $nouvelEmprunt = new Emprunt();
             $nouvelEmprunt->setAdherent($adherent);
@@ -112,9 +229,7 @@ class EmpruntCrudController extends AbstractCrudController
             $entityManager->persist($nouvelEmprunt);
         }
         
-        // Le flush final sera fait par EasyAdmin ou on peut le forcer ici si besoin, 
-        // mais EasyAdmin flush à la fin de l'action 'new'.
-        // Cependant, comme on a ajouté des objets manuellement, il vaut mieux s'assurer qu'ils partent.
+        // on s'assure d'envoyer les infos
         $entityManager->flush();
 
         $this->addFlash('success', sprintf('%d emprunt(s) créé(s) avec succès.', count($livresSelectionnes) + 1));

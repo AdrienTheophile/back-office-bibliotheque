@@ -47,6 +47,12 @@ class DashboardController extends AbstractDashboardController
             ->setTitle('Back Office Bibliotheque');
     }
 
+    public function configureAssets(): \EasyCorp\Bundle\EasyAdminBundle\Config\Assets
+    {
+        return \EasyCorp\Bundle\EasyAdminBundle\Config\Assets::new()
+            ->addCssFile('css/admin.css');
+    }
+
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');

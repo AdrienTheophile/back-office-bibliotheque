@@ -6,6 +6,8 @@ use App\Repository\EmpruntRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 #[ORM\Entity(repositoryClass: EmpruntRepository::class)]
 class Emprunt
 {
@@ -25,6 +27,7 @@ class Emprunt
 
     #[ORM\ManyToOne(inversedBy: 'emprunts')]
     #[ORM\JoinColumn(nullable: false, referencedColumnName: 'id_adh')]
+    #[Assert\NotNull(message: 'Veuillez sélectionner un adhérent.')]
     private ?Adherent $adherent = null;
 
     #[ORM\ManyToOne(inversedBy: 'emprunts')]
@@ -33,7 +36,16 @@ class Emprunt
     private ?Livre $livre = null;
 
     // Représente les livres sélectionnés pour le formulaire EasyAdmin (sélection multiple)
+    #[Assert\Count(
+        min: 1, 
+        max: 5, 
+        minMessage: 'Vous devez sélectionner au moins un livre.', 
+        maxMessage: 'Vous ne pouvez pas emprunter plus de 5 livres à la fois.'
+    )]
     private ?array $livresEmpruntes = [];
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $dateRetourReel = null;
 
     public function getLivresEmpruntes(): ?array
     {
@@ -101,5 +113,27 @@ class Emprunt
         $this->livre = $livre;
 
         return $this;
+    }
+
+    public function getDateRetourReel(): ?\DateTime
+    {
+        return $this->dateRetourReel;
+    }
+
+    public function setDateRetourReel(?\DateTime $dateRetourReel): static
+    {
+        $this->dateRetourReel = $dateRetourReel;
+
+        return $this;
+    }
+
+    public function isEnRetard(): bool
+    {
+        // En retard si : pas rendu (dateRetourReel NULL) ET dateRetour < maintenant
+        if ($this->dateRetourReel !== null) {
+            return false;
+        }
+
+        return $this->dateRetour < new \DateTime();
     }
 }
