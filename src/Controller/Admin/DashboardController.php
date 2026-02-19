@@ -8,6 +8,7 @@ use App\Entity\Categorie;
 use App\Entity\Emprunt;
 use App\Entity\Livre;
 use App\Entity\Reservations;
+use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -56,16 +57,19 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
+
+        yield MenuItem::linkToCrud('Utilisateurs', 'fa fa-user', Utilisateur::class)->setPermission('ROLE_ADMIN');
         
         yield MenuItem::linkToCrud('Adhérents', 'fa fa-users', Adherent::class);
 
-        yield MenuItem::section('Catalogue');
-        yield MenuItem::linkToCrud('Livres', 'fa fa-book', Livre::class);
-        yield MenuItem::linkToCrud('Auteurs', 'fa fa-pen-fancy', Auteur::class);
-        yield MenuItem::linkToCrud('Catégories', 'fa fa-tags', Categorie::class);
+        yield MenuItem::section('Catalogue')->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToCrud('Livres', 'fa fa-book', Livre::class)->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToCrud('Auteurs', 'fa fa-pen-fancy', Auteur::class)->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToCrud('Catégories', 'fa fa-tags', Categorie::class)->setPermission('ROLE_ADMIN');
 
         yield MenuItem::section('Gestion');
         yield MenuItem::linkToCrud('Emprunts', 'fa fa-handshake', Emprunt::class);
         yield MenuItem::linkToCrud('Réservations', 'fa fa-calendar-check', Reservations::class);
+
     }
 }

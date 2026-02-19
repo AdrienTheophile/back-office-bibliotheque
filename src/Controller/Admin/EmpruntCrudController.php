@@ -7,6 +7,7 @@ use App\Repository\EmpruntRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -15,9 +16,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Component\HttpFoundation\Response;
 
 class EmpruntCrudController extends AbstractCrudController
 {
@@ -55,10 +60,10 @@ class EmpruntCrudController extends AbstractCrudController
         return $qb;
     }
 
-    public function configureActions(\EasyCorp\Bundle\EasyAdminBundle\Config\Actions $actions): \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
+    public function configureActions(Actions $actions): Actions
     {
         // Action existante pour marquer comme rendu
-        $returnBook = \EasyCorp\Bundle\EasyAdminBundle\Config\Action::new('returnBook', 'Marquer comme rendu', 'fa fa-check')
+        $returnBook = Action::new('returnBook', 'Marquer comme rendu', 'fa fa-check')
             ->linkToCrudAction('rendreLivre')
             ->displayIf(static function ($entity) {
                 return $entity->getDateRetourReel() === null;
@@ -109,7 +114,7 @@ class EmpruntCrudController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, $btnRendus);
     }
 
-    public function rendreLivre(\EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext $context, EntityManagerInterface $entityManager): \Symfony\Component\HttpFoundation\Response
+    public function rendreLivre(AdminContext $context, EntityManagerInterface $entityManager): Response
     {
         $id = $context->getRequest()->query->get('entityId');
         $emprunt = $entityManager->getRepository(Emprunt::class)->find($id);
@@ -124,9 +129,9 @@ class EmpruntCrudController extends AbstractCrudController
 
         $this->addFlash('success', 'Le livre a été marqué comme rendu.');
 
-        $url = $this->container->get(\EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator::class)
+        $url = $this->container->get(AdminUrlGenerator::class)
             ->setController(self::class)
-            ->setAction(\EasyCorp\Bundle\EasyAdminBundle\Config\Action::INDEX)
+            ->setAction(Action::INDEX)
             ->generateUrl();
 
         return $this->redirect($url);
@@ -149,7 +154,7 @@ class EmpruntCrudController extends AbstractCrudController
         }
 
         // selection de
-        $livresField = \EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField::new('livresEmpruntes', 'Livres à emprunter')
+        $livresField = ChoiceField::new('livresEmpruntes', 'Livres à emprunter')
             ->setChoices($choixLivres)
             ->allowMultipleChoices()
             ->setRequired(true)
@@ -179,7 +184,7 @@ class EmpruntCrudController extends AbstractCrudController
         ];
     }
 
-    public function configureFilters(\EasyCorp\Bundle\EasyAdminBundle\Config\Filters $filters): \EasyCorp\Bundle\EasyAdminBundle\Config\Filters 
+    public function configureFilters(Filters $filters): Filters 
     {
         return $filters
             ->add('adherent')

@@ -10,6 +10,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TelephoneField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 
 class AdherentCrudController extends AbstractCrudController
 {
@@ -33,5 +35,12 @@ class AdherentCrudController extends AbstractCrudController
             AssociationField::new('emprunts')->hideOnForm(),
             AssociationField::new('reservations', 'Réservations')->hideOnForm(),
         ];
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions
+            ->setPermission(Action::EDIT, 'ROLE_ADMIN')
+            ->setPermission(Action::DELETE, 'ROLE_ADMIN');
     }
 }
