@@ -70,4 +70,46 @@ class LivreRepository extends ServiceEntityRepository
 
         return $result;
     }
+
+    /**
+     * Recherche avancée de livres via critères combinables
+     */
+    public function findByAdvancedSearch(array $params): array
+    {
+        $qb = $this->createQueryBuilder('l');
+
+        if (!empty($params['titre'])) {
+            $qb->andWhere('l.titre LIKE :titre')
+                ->setParameter('titre', '%' . $params['titre'] . '%');
+        }
+
+        if (!empty($params['auteur'])) {
+            $qb->innerJoin('l.auteurs', 'a')
+                ->andWhere('a.idAut = :auteur')
+                ->setParameter('auteur', $params['auteur']);
+        }
+
+        if (!empty($params['categorie'])) {
+            $qb->innerJoin('l.categories', 'c')
+                ->andWhere('c.idCat = :categorie')
+                ->setParameter('categorie', $params['categorie']);
+        }
+
+        if (!empty($params['langue'])) {
+            $qb->andWhere('l.langue = :langue')
+                ->setParameter('langue', $params['langue']);
+        }
+
+        if (!empty($params['dateMin'])) {
+            $qb->andWhere('l.dateSortie >= :dateMin')
+                ->setParameter('dateMin', $params['dateMin']);
+        }
+
+        if (!empty($params['dateMax'])) {
+            $qb->andWhere('l.dateSortie <= :dateMax')
+                ->setParameter('dateMax', $params['dateMax']);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

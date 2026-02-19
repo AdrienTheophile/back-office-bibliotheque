@@ -30,4 +30,20 @@ class LivreController extends AbstractController
         return $this->json($livre, 200, [], ['groups' => 'livre:read']);
     }
 
+    #[Route('/recherche', name: 'api_livres_search', methods: ['GET'])]
+    public function search(Request $request, LivreRepository $livreRepository): JsonResponse
+    {
+        $params = [
+            'titre' => $request->query->get('titre'),
+            'auteur' => $request->query->get('auteur'),
+            'categorie' => $request->query->get('categorie'),
+            'langue' => $request->query->get('langue'),
+            'dateMin' => $request->query->get('dateMin'),
+            'dateMax' => $request->query->get('dateMax'),
+        ];
+
+        $livres = $livreRepository->findByAdvancedSearch($params);
+
+        return $this->json($livres, 200, [], ['groups' => 'livre:read']);
+    }
 }
