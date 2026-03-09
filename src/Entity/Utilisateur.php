@@ -38,6 +38,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100)]
     private ?string $prenom = null;
 
+    #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'])]
+    private ?Adherent $adherent = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -146,6 +149,26 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void
     {
         // @deprecated, to be removed when upgrading to Symfony 8
+    }
+
+    public function getAdherent(): ?Adherent
+    {
+        return $this->adherent;
+    }
+
+    public function setAdherent(?Adherent $adherent): static
+    {
+        if ($adherent === null && $this->adherent !== null) {
+            $this->adherent->setUtilisateur(null);
+        }
+        
+        if ($adherent !== null && $adherent->getUtilisateur() !== $this) {
+            $adherent->setUtilisateur($this);
+        }
+
+        $this->adherent = $adherent;
+
+        return $this;
     }
 
 }

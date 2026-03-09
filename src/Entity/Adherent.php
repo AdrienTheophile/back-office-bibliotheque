@@ -22,21 +22,14 @@ class Adherent
     #[Groups(['adherent:read'])]
     private ?\DateTime $dateAdhesion = null;
 
-    #[ORM\Column(length: 100)]
+    #[ORM\OneToOne(inversedBy: 'adherent', cascade: ['persist'])]
+    #[ORM\JoinColumn(nullable: false)]
     #[Groups(['adherent:read'])]
-    private ?string $nom = null;
-
-    #[ORM\Column(length: 100)]
-    #[Groups(['adherent:read'])]
-    private ?string $prenom = null;
+    private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(['adherent:read'])]
     private ?\DateTime $dateNaiss = null;
-
-    #[ORM\Column(length: 255)]
-    #[Groups(['adherent:read'])]
-    private ?string $email = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['adherent:read'])]
@@ -71,7 +64,7 @@ class Adherent
 
     public function __toString(): string
     {
-        return $this->prenom . ' ' . $this->nom;
+        return $this->utilisateur ? $this->utilisateur->getPrenom() . ' ' . $this->utilisateur->getNom() : '';
     }
 
     public function getIdAdh(): ?int
@@ -91,26 +84,14 @@ class Adherent
         return $this;
     }
 
-    public function getNom(): ?string
+    public function getUtilisateur(): ?Utilisateur
     {
-        return $this->nom;
+        return $this->utilisateur;
     }
 
-    public function setNom(string $nom): static
+    public function setUtilisateur(Utilisateur $utilisateur): static
     {
-        $this->nom = $nom;
-
-        return $this;
-    }
-
-    public function getPrenom(): ?string
-    {
-        return $this->prenom;
-    }
-
-    public function setPrenom(string $prenom): static
-    {
-        $this->prenom = $prenom;
+        $this->utilisateur = $utilisateur;
 
         return $this;
     }
@@ -123,18 +104,6 @@ class Adherent
     public function setDateNaiss(\DateTime $dateNaiss): static
     {
         $this->dateNaiss = $dateNaiss;
-
-        return $this;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): static
-    {
-        $this->email = $email;
 
         return $this;
     }
