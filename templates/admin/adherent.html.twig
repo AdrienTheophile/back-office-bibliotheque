@@ -1,8 +1,8 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
 {% block page_title %}Emprunts de
-	{{ adherent.prenom }}
-	{{ adherent.nom }}
+	{{ adherent.utilisateur.prenom }}
+	{{ adherent.utilisateur.nom }}
 {% endblock %}
 
 {% block content_header %}
@@ -13,8 +13,8 @@
 		</a>
 		<h1>
 			<i class="fa fa-book me-2"></i>Emprunts de
-			{{ adherent.prenom }}
-			{{ adherent.nom }}
+			{{ adherent.utilisateur.prenom }}
+			{{ adherent.utilisateur.nom }}
 		</h1>
 	</div>
 {% endblock %}
@@ -26,7 +26,7 @@
 				<div class="row">
 					<div class="col-md-4">
 						<strong>Email :</strong>
-						{{ adherent.email }}
+						{{ adherent.utilisateur.email }}
 					</div>
 					<div class="col-md-4">
 						<strong>Téléphone :</strong>
@@ -44,6 +44,14 @@
 						<strong>Adresse postale :</strong>
 						{{ adherent.adressePostale }}
 					</div>
+					<div class="col-md-4 mt-3">
+						<strong>Statut du compte :</strong>
+						{% if adherent.estActif %}
+							<span class="badge bg-success">Actif</span>
+						{% else %}
+							<span class="badge bg-danger">Suspendu</span>
+						{% endif %}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -58,11 +66,22 @@
 			{% endfor %}
 		{% endfor %}
 
-		{# Bouton pour créer un emprunt #}
-		<div class="mb-4">
+		{# Action buttons #}
+		<div class="mb-4 d-flex gap-2">
 			<a href="{{ ea_url() .setController('App\\Controller\\Admin\\EmpruntCrudController') .setAction('new') .unset('entityId') .set('adherentId', adherent.idAdh) }}" class="btn btn-primary">
 				<i class="fa fa-plus me-1"></i>
 				Enregistrer un emprunt
+			</a>
+
+			<a href="{{ ea_url() .setController('App\\Controller\\Admin\\AdherentCrudController') .setAction('toggleActif') .set('entityId', adherent.idAdh) }}" class="btn {% if adherent.estActif %}btn-outline-danger{% else %}btn-outline-success{% endif %}" onclick="return confirm('Êtes-vous sûr de vouloir {% if adherent.estActif %}suspendre{% else %}réactiver{% endif %} ce compte ?');">
+
+				{% if adherent.estActif %}
+					<i class="fa fa-ban me-1"></i>
+					Suspendre le compte
+				{% else %}
+					<i class="fa fa-check-circle me-1"></i>
+					Réactiver le compte
+				{% endif %}
 			</a>
 		</div>
 

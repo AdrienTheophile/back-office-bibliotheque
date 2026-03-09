@@ -56,6 +56,9 @@ class Adherent
     #[Groups(['adherent:read'])]
     private Collection $emprunts;
 
+    #[ORM\Column(options: ['default' => true])]
+    private ?bool $estActif = true;
+
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
@@ -200,6 +203,18 @@ class Adherent
                 $emprunt->setAdherent(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isEstActif(): ?bool
+    {
+        return $this->estActif;
+    }
+
+    public function setEstActif(bool $estActif): static
+    {
+        $this->estActif = $estActif;
 
         return $this;
     }

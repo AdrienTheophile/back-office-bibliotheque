@@ -175,7 +175,7 @@ class EmpruntCrudController extends AbstractCrudController
         }
 
         return [
-            IdField::new('idEmp', 'ID')->hideOnForm(),
+            IdField::new('idEmp', 'ID')->hideOnForm()->hideOnIndex(),
             $adherentField,
             AssociationField::new('livre')
                 ->hideOnForm() 
@@ -184,8 +184,13 @@ class EmpruntCrudController extends AbstractCrudController
             // champ multiple pour remplacer le champ de livre de base 
             $livresField,
 
-            DateField::new('dateEmprunt', "Date d'emprunt")->setFormTypeOption('data', new \DateTime()),
-            DateField::new('dateRetour', 'Date limite retour')->setFormTypeOption('data', new \DateTime('+15 days')), //15 jours avant de considerer comme un retard
+            DateField::new('dateEmprunt', "Date d'emprunt")
+                ->setFormTypeOption('data', new \DateTime())
+                ->setFormTypeOption('disabled', true),
+            
+            DateField::new('dateRetour', 'Date limite retour')
+                ->setFormTypeOption('data', new \DateTime('+15 days'))
+                ->setFormTypeOption('disabled', true), //15 jours avant de considerer comme un retard
             
             DateField::new('dateRetourReel', 'Date de retour effectif')
                 ->setFormat('dd/MM/yyyy')
@@ -259,6 +264,12 @@ class EmpruntCrudController extends AbstractCrudController
         // 1er livre assigné à l'entité ($entityInstance) d'EasyAdmin
         $premierLivre = array_shift($livresSelectionnes);
         $entityInstance->setLivre($premierLivre);
+
+        // Forcer les dates, car les champs désactivés dans le form ne sont pas renvoyés
+        $dateEmprunt = new \DateTime();
+        $dateRetour = (clone $dateEmprunt)->modify('+15 days');
+        $entityInstance->setDateEmprunt($dateEmprunt);
+        $entityInstance->setDateRetour($dateRetour);
         
         // On persiste l'entité principale
         parent::persistEntity($entityManager, $entityInstance);
@@ -268,8 +279,8 @@ class EmpruntCrudController extends AbstractCrudController
             $nouvelEmprunt = new Emprunt();
             $nouvelEmprunt->setAdherent($adherent);
             $nouvelEmprunt->setLivre($autreLivre); // Un emprunt = Un livre
-            $nouvelEmprunt->setDateEmprunt($entityInstance->getDateEmprunt());
-            $nouvelEmprunt->setDateRetour($entityInstance->getDateRetour());
+            $nouvelEmprunt->setDateEmprunt($dateEmprunt);
+            $nouvelEmprunt->setDateRetour($dateRetour);
             
             $entityManager->persist($nouvelEmprunt);
         }
@@ -278,5 +289,23 @@ class EmpruntCrudController extends AbstractCrudController
         $entityManager->flush();
 
         $this->addFlash('success', sprintf('%d emprunt(s) créé(s) avec succès.', count($livresSelectionnes) + 1));
+    }
+
+    protected function getRedirectResponseAfterSave(AdminContext $context, string $action): \Symfony\Component\HttpFoundation\RedirectResponse
+    {
+        $request = $context->getRequest();
+        $adherentId = $request->query->get('adherentId');
+
+        if ($adherentId) {
+            $url = $this->container->get(AdminUrlGenerator::class)
+                ->setController(AdherentCrudController::class)
+                ->setAction('voirEmprunts')
+                ->setEntityId($adherentId)
+                ->generateUrl();
+
+            return $this->redirect($url);
+        }
+
+        return parent::getRedirectResponseAfterSave($context, $action);
     }
 }
