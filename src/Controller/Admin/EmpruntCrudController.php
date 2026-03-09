@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Emprunt;
+use App\Entity\Adherent;
 use App\Repository\EmpruntRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -28,6 +29,7 @@ class EmpruntCrudController extends AbstractCrudController
 {
     public function __construct(
         private EmpruntRepository $empruntRepository,
+        private EntityManagerInterface $em,
     ) {
     }
 
@@ -111,7 +113,9 @@ class EmpruntCrudController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, $btnTout)
             ->add(Crud::PAGE_INDEX, $btnEnCours)
             ->add(Crud::PAGE_INDEX, $btnRetard)
-            ->add(Crud::PAGE_INDEX, $btnRendus);
+            ->add(Crud::PAGE_INDEX, $btnRendus)
+            ->setPermission(Action::EDIT, 'ROLE_ADMIN')
+            ->setPermission(Action::DELETE, 'ROLE_ADMIN');
     }
 
     public function rendreLivre(AdminContext $context, EntityManagerInterface $entityManager): Response
@@ -161,9 +165,18 @@ class EmpruntCrudController extends AbstractCrudController
             ->hideOnIndex()
             ->hideWhenUpdating();
 
+        // Vérifier si l'adhérent est pré-sélectionné (depuis la page adhérent)
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        $adherentId = $request ? $request->query->get('adherentId') : null;
+
+        $adherentField = AssociationField::new('adherent', 'Adhérent');
+        if ($adherentId) {
+            $adherentField->setFormTypeOption('disabled', true);
+        }
+
         return [
             IdField::new('idEmp', 'ID')->hideOnForm(),
-            AssociationField::new('adherent', 'Adhérent'),
+            $adherentField,
             AssociationField::new('livre')
                 ->hideOnForm() 
                 ->setLabel('Livre'),
@@ -176,7 +189,7 @@ class EmpruntCrudController extends AbstractCrudController
             
             DateField::new('dateRetourReel', 'Date de retour effectif')
                 ->setFormat('dd/MM/yyyy')
-                ->hideOnForm(), // On gère le retour via une action, ou on l'affiche seulement en lecture
+                ->hideOnForm(), // On gère le retour via une action ou on l'affiche seulement en lecture
 
             BooleanField::new('enRetard', 'En retard')
                 ->renderAsSwitch(false)
@@ -193,8 +206,35 @@ class EmpruntCrudController extends AbstractCrudController
             ->add('dateRetourReel');
     }
 
+    public function createEntity(string $entityFqcn)
+    {
+        $emprunt = new Emprunt();
+
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        $adherentId = $request ? $request->query->get('adherentId') : null;
+
+        if ($adherentId) {
+            $adherent = $this->em->getRepository(Adherent::class)->find($adherentId);
+            if ($adherent) {
+                $emprunt->setAdherent($adherent);
+            }
+        }
+
+        return $emprunt;
+    }
+
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
+        // Si l'adhérent a été pré-sélectionné (champ disabled ne soumet pas la valeur)
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        $adherentId = $request ? $request->query->get('adherentId') : null;
+        if ($adherentId && !$entityInstance->getAdherent()) {
+            $adherent = $entityManager->getRepository(Adherent::class)->find($adherentId);
+            if ($adherent) {
+                $entityInstance->setAdherent($adherent);
+            }
+        }
+
         
         $adherent = $entityInstance->getAdherent();
         $livresSelectionnes = $entityInstance->getLivresEmpruntes();

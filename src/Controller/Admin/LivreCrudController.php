@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Livre;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -25,7 +26,10 @@ class LivreCrudController extends AbstractCrudController
             TextField::new('titre'),
             DateField::new('dateSortie', 'Date de sortie'),
             TextField::new('langue'),
-            TextField::new('photoCouverture'),
+            TextField::new('photoCouverture')->hideOnIndex(),
+            BooleanField::new('disponible', 'Disponible')
+                ->renderAsSwitch(false)
+                ->hideOnForm(),
             AssociationField::new('auteurs'),
             AssociationField::new('categories', 'Catégories'),
         ];

@@ -227,4 +227,14 @@ class Livre
 
         return $this;
     }
+
+    public function isDisponible(): bool
+    {
+        foreach ($this->emprunts as $emprunt) {
+            if ($emprunt->getDateRetourReel() === null) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -42,6 +42,7 @@ class EmpruntRepository extends ServiceEntityRepository
         $results = $this->createQueryBuilder('e')
             ->select('IDENTITY(e.livre) as livreId')
             ->where('e.dateRetour >= :today')
+            ->andWhere('e.dateRetourReel IS NULL')
             ->setParameter('today', new \DateTime('today'))
             ->getQuery()
             ->getScalarResult();
