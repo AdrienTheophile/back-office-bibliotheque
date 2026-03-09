@@ -18,8 +18,14 @@ class AuteurController extends AbstractController
     }
 
     #[Route('/auteurs/{id}', name: 'api_auteurs_show', methods: ['GET'])]
-    public function show(Auteur $auteur): JsonResponse
+    public function show(int $id, AuteurRepository $auteurRepository): JsonResponse
     {
+        $auteur = $auteurRepository->find($id);
+
+        if (!$auteur) {
+            return $this->json(['error' => 'Auteur non trouvé'], 404);
+        }
+
         return $this->json($auteur, 200, [], ['groups' => 'auteur:read']);
     }
 }

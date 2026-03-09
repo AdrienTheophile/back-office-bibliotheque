@@ -25,8 +25,14 @@ class LivreController extends AbstractController
     }
 
     #[Route('/livres/{id}', name: 'api_livres_show', methods: ['GET'])]
-    public function show(Livre $livre): JsonResponse
+    public function show(int $id, LivreRepository $livreRepository): JsonResponse
     {
+        $livre = $livreRepository->find($id);
+
+        if (!$livre) {
+            return $this->json(['error' => 'Livre non trouvé'], 404);
+        }
+
         return $this->json($livre, 200, [], ['groups' => 'livre:read']);
     }
 
