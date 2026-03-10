@@ -91,8 +91,7 @@ class AdherentController extends AbstractController
                 'dateRetourReel' => $emprunt->getDateRetourReel()?->format('Y-m-d'),
                 'livre' => [
                     'id' => $emprunt->getLivre()?->getIdLivre(),
-                    'titre' => $emprunt->getLivre()?->getTitre(),
-                    'isbn' => $emprunt->getLivre()?->getIsbn(),
+                    'titre' => $emprunt->getLivre()?->getTitre()
                 ]
             ];
         }
@@ -128,8 +127,7 @@ class AdherentController extends AbstractController
                 'dateReservation' => $reservation->getDateResa()?->format('Y-m-d H:i:s'),
                 'livre' => [
                     'id' => $reservation->getLivre()?->getIdLivre(),
-                    'titre' => $reservation->getLivre()?->getTitre(),
-                    'isbn' => $reservation->getLivre()?->getIsbn(),
+                    'titre' => $reservation->getLivre()?->getTitre()
                 ]
             ];
         }
