@@ -13,7 +13,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TelephoneField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -72,8 +72,15 @@ class AdherentCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        $photo = TextField::new('photo')->hideOnIndex();
-        $dateAdhesion = DateField::new('dateAdhesion', "Date d'adhésion")->hideOnForm()->hideOnIndex();
+        $photoForm = TextField::new('photo', 'URL de la photo')->onlyOnForms();
+        $photo = ImageField::new('photo', 'Photo')
+            ->setBasePath('')
+            ->hideOnForm()
+            ->hideOnIndex();
+        $dateAdhesion = DateField::new('dateAdhesion', "Date d'adhésion")
+            ->setFormat('dd/MM/yyyy')
+            ->hideOnForm()
+            ->hideOnIndex();
         
         $estActif = BooleanField::new('estActif', 'Actif')
             ->renderAsSwitch(false)
@@ -92,10 +99,12 @@ class AdherentCrudController extends AbstractCrudController
                 ->setLabel(false)
                 ->onlyOnForms(),
             DateField::new('dateNaiss', 'Date de naissance')
+                ->setFormat('dd/MM/yyyy')
                 ->hideOnIndex()
                 ->setFormTypeOption('attr', ['max' => (new \DateTime())->format('Y-m-d')]),
             TextField::new('adressePostale', 'Adresse postale')->hideOnIndex(),
             TelephoneField::new('numTel', 'Téléphone')->hideOnIndex(),
+            $photoForm,
             $photo,
             $dateAdhesion,
         ];

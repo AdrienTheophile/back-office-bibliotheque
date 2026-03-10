@@ -1,0 +1,129 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Profil de l'auteur :
+	{{ entity.instance.prenom }}
+	{{ entity.instance.nom }}
+{% endblock %}
+
+{% block content_header %}
+	<div class="d-flex gap-2 mb-4">
+		<div>
+			<a href="{{ ea_url().setController('App\\Controller\\Admin\\AuteurCrudController').setAction('index') }}" class="btn btn-secondary">
+				<i class="fa fa-arrow-left me-1"></i>
+				Retour à la liste
+			</a>
+		</div>
+		<div>
+			<a href="{{ ea_url().setController('App\\Controller\\Admin\\AuteurCrudController').setAction('edit').setEntityId(entity.instance.idAut) }}" class="btn btn-primary">
+				<i class="fa fa-edit me-1"></i>
+				Modifier cet auteur
+			</a>
+		</div>
+	</div>
+	<h1 class="mb-4">
+		<i class="fa fa-user-circle me-2 text-primary"></i>
+		{{ entity.instance.prenom }}
+		{{ entity.instance.nom }}
+	</h1>
+{% endblock %}
+
+{% block main %}
+	<div class="container-fluid mt-4">
+		<div class="card shadow-sm border-0 rounded-3">
+			<div class="card-body p-4">
+				<div
+					class="row">
+					{# Colonne Gauche : Photo de l'auteur #}
+					<div class="col-md-4 text-center mb-4 mb-md-0 d-flex flex-column align-items-center justify-content-start">
+						{% if entity.instance.photo %}
+							<img src="{{ entity.instance.photo }}" alt="Photo de {{ entity.instance.prenom }} {{ entity.instance.nom }}" class="img-fluid rounded shadow" style="max-height: 450px; object-fit: contain; width: 100%;">
+						{% else %}
+							<div class="d-flex align-items-center justify-content-center bg-light text-muted rounded shadow p-5 h-100 w-100" style="min-height: 300px;">
+								<div class="text-center">
+									<i class="fa fa-user fa-3x mb-2 text-secondary"></i>
+									<p class="mb-0">Aucune photo<br>disponible</p>
+								</div>
+							</div>
+						{% endif %}
+					</div>
+
+					{# Colonne Droite : Informations de l'auteur #}
+					<div class="col-md-8">
+						<h3 class="border-bottom pb-2 mb-4 text-secondary">
+							<i class="fa fa-address-card me-2"></i>Informations personnelles
+						</h3>
+
+						<div class="row mb-3">
+							<div class="col-sm-4 text-muted">
+								<strong>Nom complet :</strong>
+							</div>
+							<div class="col-sm-8 fw-bold fs-5">{{ entity.instance.prenom }}
+								{{ entity.instance.nom }}</div>
+						</div>
+
+						<div class="row mb-3">
+							<div class="col-sm-4 text-muted">
+								<strong>Nationalité :</strong>
+							</div>
+							<div class="col-sm-8">
+								{% if entity.instance.nationalite %}
+									<span class="badge bg-secondary mb-1 p-2 fs-6">
+										<i class="fa fa-flag me-1"></i>
+										{{ entity.instance.nationalite }}
+									</span>
+								{% else %}
+									<span class="text-muted fst-italic">Non renseignée</span>
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="row mb-3 mt-4">
+							<div class="col-sm-4 text-muted">
+								<strong>Date de naissance :</strong>
+							</div>
+							<div class="col-sm-8">
+								{% if entity.instance.dateNaissance %}
+									<i class="fa fa-calendar-alt text-muted me-2"></i>
+									{{ entity.instance.dateNaissance|date('d/m/Y') }}
+								{% else %}
+									<span class="text-muted fst-italic">Inconnue</span>
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<div class="col-sm-4 text-muted">
+								<strong>Date de décès :</strong>
+							</div>
+							<div class="col-sm-8">
+								{% if entity.instance.dateDeces %}
+									<i class="fa fa-cross text-muted me-2"></i>
+									{{ entity.instance.dateDeces|date('d/m/Y') }}
+								{% else %}
+									<span class="text-muted fst-italic">Non renseignée / Vivant</span>
+								{% endif %}
+							</div>
+						</div>
+
+						<h3 class="border-bottom pb-2 mt-5 mb-4 text-secondary">
+							<i class="fa fa-book-reader me-2"></i>Biographie
+						</h3>
+
+						<div class="row mb-3">
+							<div class="col-sm-12">
+								{% if entity.instance.description %}
+									<div class="bg-light p-3 rounded border text-muted">
+										{{ entity.instance.description|nl2br }}
+									</div>
+								{% else %}
+									<span class="text-muted fst-italic">Aucune biographie disponible pour cet auteur.</span>
+								{% endif %}
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

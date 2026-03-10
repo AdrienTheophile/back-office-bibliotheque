@@ -185,10 +185,12 @@ class EmpruntCrudController extends AbstractCrudController
             $livresField,
 
             DateField::new('dateEmprunt', "Date d'emprunt")
+                ->setFormat('dd/MM/yyyy')
                 ->setFormTypeOption('data', new \DateTime())
                 ->setFormTypeOption('disabled', true),
             
             DateField::new('dateRetour', 'Date limite retour')
+                ->setFormat('dd/MM/yyyy')
                 ->setFormTypeOption('data', new \DateTime('+15 days'))
                 ->setFormTypeOption('disabled', true), //15 jours avant de considerer comme un retard
             
@@ -242,6 +244,17 @@ class EmpruntCrudController extends AbstractCrudController
 
         
         $adherent = $entityInstance->getAdherent();
+
+        // Vérification de la suspension
+        if (!$adherent->isEstActif()) {
+            $this->addFlash('danger', sprintf(
+                'Impossible d\'enregistrer cet emprunt : Le compte de l\'adhérent "%s" est actuellement suspendu.',
+                $adherent
+            ));
+            
+            return; // dans ce cas on ne change rien
+        }
+
         $livresSelectionnes = $entityInstance->getLivresEmpruntes();
 
         // Vérification limite de 5 emprunts en simultanés

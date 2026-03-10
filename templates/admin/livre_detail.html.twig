@@ -1,0 +1,143 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Détails du livre :
+	{{ entity.instance.titre }}
+{% endblock %}
+
+{% block content_header %}
+	<div class="d-flex gap-2 mb-4">
+		<div>
+			<a href="{{ ea_url().setController('App\\Controller\\Admin\\LivreCrudController').setAction('index') }}" class="btn btn-secondary">
+				<i class="fa fa-arrow-left me-1"></i>
+				Retour à la liste
+			</a>
+		</div>
+		<div>
+			<a href="{{ ea_url().setController('App\\Controller\\Admin\\LivreCrudController').setAction('edit').setEntityId(entity.instance.idLivre) }}" class="btn btn-primary">
+				<i class="fa fa-edit me-1"></i>
+				Modifier ce livre
+			</a>
+		</div>
+	</div>
+	<h1 class="mb-4">
+		<i class="fa fa-book-open me-2 text-primary"></i>
+		{{ entity.instance.titre }}
+	</h1>
+{% endblock %}
+
+{% block main %}
+	<div class="container-fluid mt-4">
+		<div class="card shadow-sm border-0 rounded-3">
+			<div class="card-body p-4">
+				<div
+					class="row">
+					{# image de couverture #}
+					<div class="col-md-4 text-center mb-4 mb-md-0 d-flex flex-column align-items-center justify-content-start">
+						{% if entity.instance.photoCouverture %}
+							<img src="{{ entity.instance.photoCouverture }}" alt="Couverture de {{ entity.instance.titre }}" class="img-fluid rounded shadow" style="max-height: 450px; object-fit: contain; width: 100%;">
+						{% else %}
+							<div class="d-flex align-items-center justify-content-center bg-light text-muted rounded shadow p-5 h-100 w-100" style="min-height: 300px;">
+								<div class="text-center">
+									<i class="fa fa-image fa-3x mb-2"></i>
+									<p class="mb-0">Aucune couverture<br>disponible</p>
+								</div>
+							</div>
+						{% endif %}
+					</div>
+
+					{# infos livre #}
+					<div class="col-md-8">
+						<h3 class="border-bottom pb-2 mb-4 text-secondary">
+							<i class="fa fa-info-circle me-2"></i>Informations
+						</h3>
+
+						<div class="row mb-3">
+							<div class="col-sm-4 text-muted">
+								<strong>Titre complet :</strong>
+							</div>
+							<div class="col-sm-8 fw-bold fs-5">{{ entity.instance.titre }}</div>
+						</div>
+
+						<div class="row mb-3">
+							<div class="col-sm-4 text-muted">
+								<strong>Auteur(s) :</strong>
+							</div>
+							<div class="col-sm-8">
+								{% if entity.instance.auteurs|length > 0 %}
+									{% for auteur in entity.instance.auteurs %}
+										<span class="badge bg-secondary mb-1 p-2 fs-6">
+											<i class="fa fa-user me-1"></i>
+											{{ auteur.prenom }}
+											{{ auteur.nom }}
+										</span>
+									{% endfor %}
+								{% else %}
+									<span class="text-muted fst-italic">Non renseigné</span>
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<div class="col-sm-4 text-muted">
+								<strong>Catégorie(s) :</strong>
+							</div>
+							<div class="col-sm-8">
+								{% if entity.instance.categories|length > 0 %}
+									{% for cat in entity.instance.categories %}
+										<span class="badge bg-info text-dark mb-1 p-2">
+											<i class="fa fa-tag me-1"></i>
+											{{ cat.nom }}
+										</span>
+									{% endfor %}
+								{% else %}
+									<span class="text-muted fst-italic">Non catégorisé</span>
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<div class="col-sm-4 text-muted">
+								<strong>Date de sortie :</strong>
+							</div>
+							<div class="col-sm-8">
+								{% if entity.instance.dateSortie %}
+									<i class="fa fa-calendar-alt text-muted me-2"></i>
+									{{ entity.instance.dateSortie|date('d/m/Y') }}
+								{% else %}
+									<span class="text-muted fst-italic">Inconnue</span>
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<div class="col-sm-4 text-muted">
+								<strong>Langue :</strong>
+							</div>
+							<div class="col-sm-8">
+								<span class="fw-semibold">{{ entity.instance.langue|default('<span class="text-muted fst-italic">Non renseignée</span>')|raw }}</span>
+							</div>
+						</div>
+
+						<div class="row mb-3 mt-4">
+							<div class="col-sm-4 text-muted">
+								<strong>Statut :</strong>
+							</div>
+							<div class="col-sm-8">
+								{% if entity.instance.disponible %}
+									<span class="badge bg-success p-2 fs-6">
+										<i class="fa fa-check-circle me-1"></i>Disponible
+									</span>
+								{% else %}
+									<span class="badge bg-warning text-dark p-2 fs-6">
+										<i class="fa fa-exclamation-triangle me-1"></i>Actuellement emprunté
+									</span>
+								{% endif %}
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

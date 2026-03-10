@@ -1,0 +1,137 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Statistiques des emprunts
+{% endblock %}
+
+{% block content_header %}
+	<h1>
+		<i class="fa fa-chart-bar"></i>
+		Statistiques des emprunts</h1>
+{% endblock %}
+
+{% block main %}
+	<div class="container mt-4">
+
+		<div class="row mb-4">
+			<div class="col-md-3">
+				<div class="card stats-card stats-card--en-cours mb-3">
+					<div class="card-body text-center">
+						<div class="stats-icon">
+							<i class="fa fa-book-open"></i>
+						</div>
+						<h2 class="stats-number">{{ empruntsEnCours }}</h2>
+						<p class="stats-label">Emprunts en cours</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card stats-card stats-card--termines mb-3">
+					<div class="card-body text-center">
+						<div class="stats-icon">
+							<i class="fa fa-check-circle"></i>
+						</div>
+						<h2 class="stats-number">{{ empruntsTermines }}</h2>
+						<p class="stats-label">Emprunts terminés</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card stats-card stats-card--retard mb-3">
+					<div class="card-body text-center">
+						<div class="stats-icon">
+							<i class="fa fa-exclamation-triangle"></i>
+						</div>
+						<h2 class="stats-number">{{ empruntsEnRetard }}</h2>
+						<p class="stats-label">En retard</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card stats-card stats-card--duree mb-3">
+					<div class="card-body text-center">
+						<div class="stats-icon">
+							<i class="fa fa-clock"></i>
+						</div>
+						<h2 class="stats-number">{{ dureeMoyenne ?? '—' }}
+							<small>jours</small>
+						</h2>
+						<p class="stats-label">Durée moyenne</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-6 mb-4">
+				<div class="card">
+					<div class="card-header">
+						<i class="fa fa-trophy"></i>
+						Top 5 livres les plus empruntés</div>
+					<div class="card-body p-0">
+						<table class="table table-striped mb-0">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Titre</th>
+									<th class="text-end">Emprunts</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for livre in topLivres %}
+									<tr>
+										<td>{{ loop.index }}</td>
+										<td>{{ livre.titre }}</td>
+										<td class="text-end">
+											<span class="badge bg-primary">{{ livre.total }}</span>
+										</td>
+									</tr>
+								{% else %}
+									<tr>
+										<td colspan="3" class="text-center text-muted py-3">Aucune donnée</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6 mb-4">
+				<div class="card">
+					<div class="card-header">
+						<i class="fa fa-users"></i>
+						Top 5 adhérents emprunteurs</div>
+					<div class="card-body p-0">
+						<table class="table table-striped mb-0">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Adhérent</th>
+									<th class="text-end">Emprunts</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for adh in topAdherents %}
+									<tr>
+										<td>{{ loop.index }}</td>
+										<td>{{ adh.prenom }}
+											{{ adh.nom }}</td>
+										<td class="text-end">
+											<span class="badge bg-success">{{ adh.total }}</span>
+										</td>
+									</tr>
+								{% else %}
+									<tr>
+										<td colspan="3" class="text-center text-muted py-3">Aucune donnée</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+
+{% endblock %}
