@@ -11,6 +11,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -22,6 +23,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 
 #[IsGranted('ROLE_ADMIN')]
@@ -56,6 +59,29 @@ class LivreCrudController extends AbstractCrudController
         return $livre;
     }
 
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->showEntityActionsInlined()
+            ->overrideTemplate('crud/detail', 'admin/livre_detail.html.twig');
+    }
+
+    protected function getRedirectResponseAfterSave(AdminContext $context, string $action): RedirectResponse
+    {
+        $crud = $context->getCrud();
+
+        if ($crud && $crud->getCurrentPage() === Crud::PAGE_EDIT) {
+            $url = $this->container->get(AdminUrlGenerator::class)
+                ->setAction(Action::DETAIL)
+                ->setEntityId($context->getEntity()->getPrimaryKeyValue())
+                ->generateUrl();
+
+            return $this->redirect($url);
+        }
+
+        return parent::getRedirectResponseAfterSave($context, $action);
+    }
+
     public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
     {
         $qb = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
@@ -83,7 +109,8 @@ class LivreCrudController extends AbstractCrudController
     {
         $request = $this->container->get('request_stack')->getCurrentRequest();
         if (!$request) {
-            return $actions;
+            return $actions
+                ->add(Crud::PAGE_INDEX, Action::DETAIL);
         }
 
         $currentStatus = $request->query->get('status');
@@ -111,6 +138,7 @@ class LivreCrudController extends AbstractCrudController
             ->setCssClass($currentStatus === 'indispo' ? 'btn btn-warning text-dark' : 'btn btn-light');
 
         return $actions
+            ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->add(Crud::PAGE_INDEX, $btnTout)
             ->add(Crud::PAGE_INDEX, $btnDispo)
             ->add(Crud::PAGE_INDEX, $btnIndispo);
@@ -123,12 +151,16 @@ class LivreCrudController extends AbstractCrudController
             TextField::new('titre'),
             DateField::new('dateSortie', 'Date de sortie')->setFormat('dd/MM/yyyy'),
             TextField::new('langue'),
-            TextField::new('photoCouverture')->hideOnIndex(),
+            TextField::new('photoCouverture', 'URL de la couverture')->onlyOnForms(),
+            ImageField::new('photoCouverture', 'Couverture')
+                ->setBasePath('')
+                ->hideOnForm()
+                ->hideOnIndex(),
             BooleanField::new('disponible', 'Disponible')
                 ->renderAsSwitch(false)
                 ->hideOnForm(),
-            AssociationField::new('auteurs'),
-            AssociationField::new('categories', 'Catégories'),
+            AssociationField::new('auteurs')->hideOnIndex(),
+            AssociationField::new('categories', 'Catégories')->hideOnIndex(),
         ];
     }
 
