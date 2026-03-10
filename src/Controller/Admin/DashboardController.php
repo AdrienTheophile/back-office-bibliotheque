@@ -9,18 +9,23 @@ use App\Entity\Emprunt;
 use App\Entity\Livre;
 use App\Entity\Reservations;
 use App\Entity\Utilisateur;
+use App\Repository\EmpruntRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 class DashboardController extends AbstractDashboardController
 {
-    public function __construct(private EntityManagerInterface $em)
-    {
+    public function __construct(
+        private EntityManagerInterface $em,
+        private EmpruntRepository $empruntRepository,
+    ) {
     }
 
     public function index(): Response
@@ -39,6 +44,27 @@ class DashboardController extends AbstractDashboardController
             'nbEmprunts' => $nbEmprunts,
             'nbLivres' => $nbLivres,
             'nbReservations' => $nbReservations,
+        ]);
+    }
+
+    #[Route('/admin/statistiques', name: 'admin_statistiques')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function statistiques(): Response
+    {
+        $empruntsEnCours = $this->empruntRepository->countEmpruntsEnCours();
+        $empruntsTermines = $this->empruntRepository->countEmpruntsTermines();
+        $empruntsEnRetard = $this->empruntRepository->countEmpruntsEnRetard();
+        $topLivres = $this->empruntRepository->getTopLivresEmpruntes(5);
+        $topAdherents = $this->empruntRepository->getTopAdherentsEmprunteurs(5);
+        $dureeMoyenne = $this->empruntRepository->getDureeMoyenneEmprunt();
+
+        return $this->render('admin/statistiques.html.twig', [
+            'empruntsEnCours' => $empruntsEnCours,
+            'empruntsTermines' => $empruntsTermines,
+            'empruntsEnRetard' => $empruntsEnRetard,
+            'topLivres' => $topLivres,
+            'topAdherents' => $topAdherents,
+            'dureeMoyenne' => $dureeMoyenne,
         ]);
     }
 
@@ -70,6 +96,9 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('Gestion');
         yield MenuItem::linkToCrud('Emprunts', 'fa fa-handshake', Emprunt::class);
         yield MenuItem::linkToCrud('Réservations', 'fa fa-calendar-check', Reservations::class);
+
+        yield MenuItem::section('Analyses')->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToUrl('Statistiques', 'fa fa-chart-bar', $this->container->get('router')->generate('admin_statistiques'))->setPermission('ROLE_ADMIN');
 
     }
 }

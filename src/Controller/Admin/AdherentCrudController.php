@@ -73,7 +73,10 @@ class AdherentCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         $photo = TextField::new('photo')->hideOnIndex();
-        $dateAdhesion = DateField::new('dateAdhesion', "Date d'adhésion")->hideOnForm()->hideOnIndex();
+        $dateAdhesion = DateField::new('dateAdhesion', "Date d'adhésion")
+            ->setFormat('dd/MM/yyyy')
+            ->hideOnForm()
+            ->hideOnIndex();
         
         $estActif = BooleanField::new('estActif', 'Actif')
             ->renderAsSwitch(false)
@@ -92,6 +95,7 @@ class AdherentCrudController extends AbstractCrudController
                 ->setLabel(false)
                 ->onlyOnForms(),
             DateField::new('dateNaiss', 'Date de naissance')
+                ->setFormat('dd/MM/yyyy')
                 ->hideOnIndex()
                 ->setFormTypeOption('attr', ['max' => (new \DateTime())->format('Y-m-d')]),
             TextField::new('adressePostale', 'Adresse postale')->hideOnIndex(),

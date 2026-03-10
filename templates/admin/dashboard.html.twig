@@ -65,5 +65,16 @@
 				</div>
 			</div>
 		</div>
+
+		{% if is_granted('ROLE_ADMIN') %}
+			<div class="row mt-3">
+				<div class="col-12 text-center">
+					<a href="{{ path('admin_statistiques') }}" class="btn btn-stats-dashboard">
+						<i class="fa fa-chart-bar"></i>
+						Voir les statistiques des emprunts
+					</a>
+				</div>
+			</div>
+		{% endif %}
 	</div>
 {% endblock %}

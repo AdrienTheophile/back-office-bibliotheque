@@ -185,10 +185,12 @@ class EmpruntCrudController extends AbstractCrudController
             $livresField,
 
             DateField::new('dateEmprunt', "Date d'emprunt")
+                ->setFormat('dd/MM/yyyy')
                 ->setFormTypeOption('data', new \DateTime())
                 ->setFormTypeOption('disabled', true),
             
             DateField::new('dateRetour', 'Date limite retour')
+                ->setFormat('dd/MM/yyyy')
                 ->setFormTypeOption('data', new \DateTime('+15 days'))
                 ->setFormTypeOption('disabled', true), //15 jours avant de considerer comme un retard
             

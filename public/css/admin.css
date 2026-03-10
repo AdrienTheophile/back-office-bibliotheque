@@ -47,3 +47,88 @@
     font-size: 0.85em;
     font-weight: 600;
 }
+
+/* ── Statistiques ── */
+
+/* Cartes de statistiques */
+.stats-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.stats-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.stats-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.85;
+}
+
+.stats-number {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.15rem;
+}
+
+.stats-number small {
+    font-size: 0.5em;
+    font-weight: 400;
+    opacity: 0.7;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-bottom: 0;
+}
+
+.stats-card--en-cours {
+    background: linear-gradient(135deg, #4361ee, #3a86ff);
+    color: #fff;
+}
+
+.stats-card--termines {
+    background: linear-gradient(135deg, #2ec4b6, #20b876);
+    color: #fff;
+}
+
+.stats-card--retard {
+    background: linear-gradient(135deg, #e63946, #ff6b6b);
+    color: #fff;
+}
+
+.stats-card--duree {
+    background: linear-gradient(135deg, #f77f00, #fcbf49);
+    color: #fff;
+}
+
+/* Bouton statistiques sur le dashboard */
+.btn-stats-dashboard {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #4361ee, #3a86ff);
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(67, 97, 238, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-stats-dashboard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.45);
+    color: #fff;
+    text-decoration: none;
+}
+

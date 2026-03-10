@@ -69,4 +69,94 @@ class EmpruntRepository extends ServiceEntityRepository
                   ->getQuery()
                   ->getResult();
     }
+
+    /**
+     * Compte le nombre d'emprunts en cours (non rendus).
+     */
+    public function countEmpruntsEnCours(): int
+    {
+        return (int) $this->createQueryBuilder('e')
+            ->select('COUNT(e.idEmp)')
+            ->where('e.dateRetourReel IS NULL')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Compte le nombre d'emprunts terminés (rendus).
+     */
+    public function countEmpruntsTermines(): int
+    {
+        return (int) $this->createQueryBuilder('e')
+            ->select('COUNT(e.idEmp)')
+            ->where('e.dateRetourReel IS NOT NULL')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Compte le nombre d'emprunts en retard (non rendus et date de retour dépassée).
+     */
+    public function countEmpruntsEnRetard(): int
+    {
+        return (int) $this->createQueryBuilder('e')
+            ->select('COUNT(e.idEmp)')
+            ->where('e.dateRetourReel IS NULL')
+            ->andWhere('e.dateRetour < :now')
+            ->setParameter('now', new \DateTime())
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Retourne les livres les plus empruntés.
+     * @return array<array{titre: string, total: int}>
+     */
+    public function getTopLivresEmpruntes(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('e')
+            ->select('l.titre AS titre, COUNT(e.idEmp) AS total')
+            ->join('e.livre', 'l')
+            ->groupBy('l.idLivre, l.titre')
+            ->orderBy('total', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Retourne les adhérents qui ont le plus d'emprunts.
+     * @return array<array{nom: string, prenom: string, total: int}>
+     */
+    public function getTopAdherentsEmprunteurs(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('e')
+            ->select('u.nom AS nom, u.prenom AS prenom, COUNT(e.idEmp) AS total')
+            ->join('e.adherent', 'a')
+            ->join('a.utilisateur', 'u')
+            ->groupBy('a.idAdh, u.nom, u.prenom')
+            ->orderBy('total', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+
+    /**
+     * Retourne la durée moyenne d'un emprunt terminé en jours.
+     */
+    public function getDureeMoyenneEmprunt(): ?float
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = "
+            SELECT AVG(DATEDIFF(date_retour_reel, date_emprunt)) AS duree_moyenne
+            FROM emprunt
+            WHERE date_retour_reel IS NOT NULL
+        ";
+
+        $result = $conn->executeQuery($sql)->fetchAssociative();
+
+        return $result ? round((float) $result['duree_moyenne'], 1) : null;
+    }
 }
