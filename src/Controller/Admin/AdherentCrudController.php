@@ -250,9 +250,13 @@ class AdherentCrudController extends AbstractCrudController
             if ($entityInstance->getUtilisateur()) {
                 $utilisateur = $entityInstance->getUtilisateur();
                 $utilisateur->setRoles(['ROLE_ADHERENT']);
-                $utilisateur->setPassword(
-                    $this->passwordHasher->hashPassword($utilisateur, $utilisateur->getPassword())
-                );
+                
+                if ($utilisateur->getPlainPassword()) {
+                    $utilisateur->setPassword(
+                        $this->passwordHasher->hashPassword($utilisateur, $utilisateur->getPlainPassword())
+                    );
+                    $utilisateur->eraseCredentials();
+                }
             }
         }
         parent::persistEntity($entityManager, $entityInstance);
@@ -263,9 +267,13 @@ class AdherentCrudController extends AbstractCrudController
         if ($entityInstance instanceof Adherent && $entityInstance->getUtilisateur()) {
             $utilisateur = $entityInstance->getUtilisateur();
             $utilisateur->setRoles(['ROLE_ADHERENT']);
-            $utilisateur->setPassword(
-                $this->passwordHasher->hashPassword($utilisateur, $utilisateur->getPassword())
-            );
+            
+            if ($utilisateur->getPlainPassword()) {
+                $utilisateur->setPassword(
+                    $this->passwordHasher->hashPassword($utilisateur, $utilisateur->getPlainPassword())
+                );
+                $utilisateur->eraseCredentials();
+            }
         }
         parent::updateEntity($entityManager, $entityInstance);
     }

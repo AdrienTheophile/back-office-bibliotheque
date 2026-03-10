@@ -14,6 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_ADMIN')]
@@ -38,7 +39,9 @@ class UtilisateurCrudController extends AbstractCrudController
             TextField::new('email'),
             TextField::new('nom'),
             TextField::new('prenom', 'Prénom'),
-            TextField::new('password', 'Mot de passe')->onlyOnForms(),
+            TextField::new('plainPassword', 'Mot de passe')
+                ->onlyOnForms()
+                ->setRequired($pageName === Crud::PAGE_NEW),
             ChoiceField::new('roles')
                 ->setChoices([
                     'Bibliothécaire' => 'ROLE_BIBLIO',
@@ -60,20 +63,22 @@ class UtilisateurCrudController extends AbstractCrudController
 
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        if ($entityInstance instanceof Utilisateur) {
+        if ($entityInstance instanceof Utilisateur && $entityInstance->getPlainPassword()) {
             $entityInstance->setPassword(
-                $this->passwordHasher->hashPassword($entityInstance, $entityInstance->getPassword())
+                $this->passwordHasher->hashPassword($entityInstance, $entityInstance->getPlainPassword())
             );
+            $entityInstance->eraseCredentials(); // Bonne pratique
         }
         parent::persistEntity($entityManager, $entityInstance);
     }
 
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        if ($entityInstance instanceof Utilisateur) {
+        if ($entityInstance instanceof Utilisateur && $entityInstance->getPlainPassword()) {
             $entityInstance->setPassword(
-                $this->passwordHasher->hashPassword($entityInstance, $entityInstance->getPassword())
+                $this->passwordHasher->hashPassword($entityInstance, $entityInstance->getPlainPassword())
             );
+            $entityInstance->eraseCredentials();
         }
         parent::updateEntity($entityManager, $entityInstance);
     }

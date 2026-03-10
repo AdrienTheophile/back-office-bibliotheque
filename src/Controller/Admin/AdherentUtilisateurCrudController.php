@@ -7,6 +7,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
 /**
  * Utilisé uniquement comme formulaire embarqué dans AdherentCrudController.
@@ -25,7 +26,9 @@ class AdherentUtilisateurCrudController extends AbstractCrudController
             EmailField::new('email'),
             TextField::new('nom'),
             TextField::new('prenom', 'Prénom'),
-            TextField::new('password', 'Mot de passe')->onlyOnForms(),
+            TextField::new('plainPassword', 'Mot de passe')
+                ->onlyOnForms()
+                ->setRequired($pageName === Crud::PAGE_NEW),
             ChoiceField::new('roles')
                 ->setChoices([
                     'Adhérent' => 'ROLE_ADHERENT',
