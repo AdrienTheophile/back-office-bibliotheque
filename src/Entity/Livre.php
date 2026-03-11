@@ -70,6 +70,7 @@ class Livre
     private Collection $categories;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['livre:read', 'auteur:read', 'categorie:read', 'emprunt:read', 'reservation:read'])]
     private ?string $synopsis = null;
 
     public function __construct()
