@@ -217,9 +217,9 @@ class EmpruntCrudController extends AbstractCrudController
             AssociationField::new('livre')
                 ->hideOnForm()
                 ->setLabel('Livre'),
-            $dateEmprunt,
-            $dateRetour,
-            $dateRetourReel,
+            $dateEmprunt->hideOnIndex(),
+            $dateRetour->hideOnIndex(),
+            $dateRetourReel->hideOnIndex(),
             BooleanField::new('enRetard', 'En retard')
                 ->renderAsSwitch(false)
                 ->hideOnForm(),
