@@ -5,7 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Reservations;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 
 class ReservationsCrudController extends AbstractCrudController
@@ -21,7 +21,7 @@ class ReservationsCrudController extends AbstractCrudController
             IdField::new('idResa', 'ID')->hideOnForm(),
             AssociationField::new('adherent', 'Adhérent'),
             AssociationField::new('livre'),
-            DateTimeField::new('dateResa', 'Date de réservation'),
+            DateField::new('dateResa', 'Date de réservation'),
         ];
     }
 }

@@ -23,7 +23,7 @@ class Reservations
     #[ORM\JoinColumn(nullable: false, referencedColumnName: 'id_adh')]
     private ?Adherent $adherent = null;
 
-    #[ORM\OneToOne(inversedBy: 'reservations', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false, referencedColumnName: 'id_livre')]
     #[Groups(['reservation:read', 'adherent:read'])]
     private ?Livre $livre = null;

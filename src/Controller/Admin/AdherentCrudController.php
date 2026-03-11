@@ -4,7 +4,9 @@ namespace App\Controller\Admin;
 
 use App\Entity\Adherent;
 use App\Entity\Emprunt;
+use App\Entity\Reservations;
 use App\Entity\Utilisateur;
+use App\Repository\EmpruntRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -194,7 +196,58 @@ class AdherentCrudController extends AbstractCrudController
         $url = $this->container->get(AdminUrlGenerator::class)
             ->setController(self::class)
             ->setAction('voirEmprunts')
-            ->setEntityId($emprunt->getAdherent()->getIdAdh())
+            ->setEntityId($emprunt ? $emprunt->getAdherent()->getIdAdh() : null)
+            ->generateUrl();
+
+        return $this->redirect($url);
+    }
+
+    public function emprunterReservation(AdminContext $context, EmpruntRepository $empruntRepository): Response
+    {
+        $reservationId = $context->getRequest()->query->get('reservationId');
+        $reservation = $this->em->getRepository(Reservations::class)->find($reservationId);
+
+        if (!$reservation) {
+            $this->addFlash('danger', 'Réservation introuvable.');
+        } else {
+            $adherent = $reservation->getAdherent();
+            $livre = $reservation->getLivre();
+
+            // Vérification de la suspension
+            if (!$adherent->isEstActif()) {
+                $this->addFlash('danger', 'Impossible d\'emprunter ce livre : Le compte est suspendu.');
+            } else {
+                // Vérification de la limite
+                $activeCount = $empruntRepository->countEmpruntByAdherent($adherent);
+                if ($activeCount >= 5) {
+                    $this->addFlash('danger', sprintf(
+                        'Cet adhérent a déjà %d emprunt(s) en cours. Impossible d\'emprunter plus (Limite : 5).',
+                        $activeCount
+                    ));
+                } else {
+                    $emprunt = new Emprunt();
+                    $dateEmprunt = new \DateTime();
+                    $dateRetour = (clone $dateEmprunt)->modify('+15 days');
+
+                    $emprunt->setAdherent($adherent);
+                    $emprunt->setLivre($livre);
+                    $emprunt->setDateEmprunt($dateEmprunt);
+                    $emprunt->setDateRetour($dateRetour);
+
+                    $this->em->persist($emprunt);
+                    $this->em->remove($reservation); // Delete the reservation
+                    $this->em->flush();
+
+                    $this->addFlash('success', 'La réservation a été transformée en emprunt.');
+                }
+            }
+        }
+
+        // Rediriger vers la page emprunts de l'adhérent
+        $url = $this->container->get(AdminUrlGenerator::class)
+            ->setController(self::class)
+            ->setAction('voirEmprunts')
+            ->setEntityId($adherent ? $adherent->getIdAdh() : null)
             ->generateUrl();
 
         return $this->redirect($url);

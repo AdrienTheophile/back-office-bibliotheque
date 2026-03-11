@@ -16,28 +16,21 @@ class ReservationsRepository extends ServiceEntityRepository
         parent::__construct($registry, Reservations::class);
     }
 
-    //    /**
-    //     * @return Reservations[] Returns an array of Reservations objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('r.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Delete reservations that are older than 7 days.
+     * Returns the number of deleted reservations.
+     */
+    public function deleteExpiredReservations(): int
+    {
+        $limitDate = new \DateTime();
+        $limitDate->modify('-7 days');
+        $limitDate->setTime(0, 0, 0);
 
-    //    public function findOneBySomeField($value): ?Reservations
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        return $this->createQueryBuilder('r')
+            ->delete()
+            ->where('r.dateResa < :limitDate')
+            ->setParameter('limitDate', $limitDate)
+            ->getQuery()
+            ->execute();
+    }
 }

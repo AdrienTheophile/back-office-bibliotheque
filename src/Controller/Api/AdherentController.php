@@ -124,7 +124,7 @@ class AdherentController extends AbstractController
         foreach ($reservations as $reservation) {
             $data[] = [
                 'id' => $reservation->getIdResa(),
-                'dateReservation' => $reservation->getDateResa()?->format('Y-m-d H:i:s'),
+                'dateReservation' => $reservation->getDateResa()?->format('Y-m-d'),
                 'livre' => [
                     'id' => $reservation->getLivre()?->getIdLivre(),
                     'titre' => $reservation->getLivre()?->getTitre()
@@ -144,6 +144,9 @@ class AdherentController extends AbstractController
     #[Route('/reservations', name: 'create_reservation', methods: ['POST'])]
     public function createReservation(Request $request): JsonResponse
     {
+        // Supprime les réservations expirées (> 7 jours)
+        $this->reservationsRepository->deleteExpiredReservations();
+
         /** @var Utilisateur $user */
         $user = $this->getUser();
         $adherent = $user->getAdherent();
@@ -185,7 +188,10 @@ class AdherentController extends AbstractController
         $reservation = new Reservations();
         $reservation->setAdherent($adherent);
         $reservation->setLivre($livre);
-        $reservation->setDateResa(new \DateTime());
+        
+        $dateResa = new \DateTime();
+        $dateResa->setTime(0, 0, 0);
+        $reservation->setDateResa($dateResa);
 
         $this->entityManager->persist($reservation);
         $this->entityManager->flush();
@@ -194,7 +200,7 @@ class AdherentController extends AbstractController
             'message' => 'Réservation créée avec succès',
             'reservation' => [
                 'id' => $reservation->getIdResa(),
-                'dateReservation' => $reservation->getDateResa()?->format('Y-m-d H:i:s'),
+                'dateReservation' => $reservation->getDateResa()?->format('Y-m-d'),
                 'livre' => [
                     'id' => $livre->getIdLivre(),
                     'titre' => $livre->getTitre(),

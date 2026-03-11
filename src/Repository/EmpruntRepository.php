@@ -26,37 +26,51 @@ class EmpruntRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('e')
             ->select('COUNT(e.idEmp)')
             ->where('e.adherent = :adherent')
-            ->andWhere('e.dateRetour >= :today')
+            ->andWhere('e.dateRetourReel IS NULL')
             ->setParameter('adherent', $adherent)
-            ->setParameter('today', new \DateTime('today'))
             ->getQuery()
             ->getSingleScalarResult();
     }
 
     /**
-     * Retourne les IDs des livres actuellement empruntés 
-     * On ne peut pas les umpruntés s'il ne sont pas disponibles 
+     * Retourne les IDs des livres non disponibles pour un adhérent spécifique.
+     * Un livre est non disponible si:
+     * - Il est actuellement emprunté par quelqu'un.
+     * - Il est actuellement réservé par quelqu'un d'autre que l'adhérent fourni.
      */
-    public function findLivreNotAvailable(): array
+    public function findLivreNotAvailable(?\App\Entity\Adherent $adherent = null): array
     {
-        $results = $this->createQueryBuilder('e')
+        // 1. Livres empruntés
+        $empruntes = $this->createQueryBuilder('e')
             ->select('IDENTITY(e.livre) as livreId')
-            ->where('e.dateRetour >= :today')
-            ->andWhere('e.dateRetourReel IS NULL')
-            ->setParameter('today', new \DateTime('today'))
+            ->where('e.dateRetourReel IS NULL')
             ->getQuery()
             ->getScalarResult();
+            
+        $empruntesIds = array_column($empruntes, 'livreId');
 
-        return array_column($results, 'livreId');
+        // 2. Livres réservés (par une autre personne)
+        $qbResa = $this->getEntityManager()->getRepository(\App\Entity\Reservations::class)->createQueryBuilder('r')
+            ->select('IDENTITY(r.livre) as livreId');
+            
+        if ($adherent) {
+            $qbResa->where('r.adherent != :adherent')
+                   ->setParameter('adherent', $adherent);
+        }
+        
+        $reserves = $qbResa->getQuery()->getScalarResult();
+        $reservesIds = array_column($reserves, 'livreId');
+
+        return array_unique(array_merge($empruntesIds, $reservesIds));
     }
 
     /**
-     * Retourne la liste des livres disponibles.
+     * Retourne la liste des livres disponibles pour un adhérent.
      * @return Livre[]
      */
-    public function findAvailableLivres(): array
+    public function findAvailableLivres(?\App\Entity\Adherent $adherent = null): array
     {
-        $unavailableIds = $this->findLivreNotAvailable();
+        $unavailableIds = $this->findLivreNotAvailable($adherent);
         
         $qb = $this->getEntityManager()->getRepository(Livre::class)->createQueryBuilder('l');
         

@@ -24,6 +24,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\Response;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 
 class EmpruntCrudController extends AbstractCrudController
 {
@@ -60,6 +61,11 @@ class EmpruntCrudController extends AbstractCrudController
         }
 
         return $qb;
+    }
+
+    public function configureAssets(Assets $assets): Assets
+    {
+        return $assets->addJsFile('js/admin_emprunt.js');
     }
 
     public function configureActions(Actions $actions): Actions
@@ -143,9 +149,17 @@ class EmpruntCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        // Vérifier si l'adhérent est pré-sélectionné (depuis la page adhérent)
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        $adherentId = $request ? $request->query->get('adherentId') : null;
+        $adherent = null;
+        
+        if ($adherentId) {
+            $adherent = $this->em->getRepository(Adherent::class)->find($adherentId);
+        }
 
-        // Récupérer tous les livres disponibles 
-        $livresDisponibles = $this->empruntRepository->findAvailableLivres();
+        // Récupérer tous les livres disponibles (non empruntés et non réservés par quelqu'un d'autre)
+        $livresDisponibles = $this->empruntRepository->findAvailableLivres($adherent);
         
         // Créer un tableau [titre => objet Livre] pour le ChoiceField
         $choixLivres = [];
@@ -157,17 +171,24 @@ class EmpruntCrudController extends AbstractCrudController
             $choixLivres[$titre] = $livre;
         }
 
+        $maxSelection = 5;
+
+        if ($adherent) {
+            // Remove closed loans from count 
+            $activeCount = $this->empruntRepository->countEmpruntByAdherent($adherent);
+            $maxSelection = max(0, 5 - $activeCount);
+        }
+
         // selection de
-        $livresField = ChoiceField::new('livresEmpruntes', 'Livres à emprunter')
+        $livresField = ChoiceField::new('livresEmpruntes', "Livres à emprunter (Max: $maxSelection)")
             ->setChoices($choixLivres)
             ->allowMultipleChoices()
             ->setRequired(true)
             ->hideOnIndex()
-            ->hideWhenUpdating();
-
-        // Vérifier si l'adhérent est pré-sélectionné (depuis la page adhérent)
-        $request = $this->container->get('request_stack')->getCurrentRequest();
-        $adherentId = $request ? $request->query->get('adherentId') : null;
+            ->hideWhenUpdating()
+            ->setFormTypeOption('attr', [
+                'data-max-selection' => $maxSelection,
+            ]);
 
         $adherentField = AssociationField::new('adherent', 'Adhérent');
         if ($adherentId) {

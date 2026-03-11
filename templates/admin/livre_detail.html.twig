@@ -111,6 +111,19 @@
 
 						<div class="row mb-3">
 							<div class="col-sm-4 text-muted">
+								<strong>Synopsis :</strong>
+							</div>
+							<div class="col-sm-8">
+								{% if entity.instance.synopsis %}
+									<p class="mb-0" style="white-space: pre-wrap;">{{ entity.instance.synopsis }}</p>
+								{% else %}
+									<span class="text-muted fst-italic">Aucun synopsis disponible</span>
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<div class="col-sm-4 text-muted">
 								<strong>Langue :</strong>
 							</div>
 							<div class="col-sm-8">

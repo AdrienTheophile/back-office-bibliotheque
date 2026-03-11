@@ -100,5 +100,8 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('Analyses')->setPermission('ROLE_ADMIN');
         yield MenuItem::linkToUrl('Statistiques', 'fa fa-chart-bar', $this->container->get('router')->generate('admin_statistiques'))->setPermission('ROLE_ADMIN');
 
+        yield MenuItem::section('Site Public');
+        yield MenuItem::linkToUrl('Accéder au site', 'fa fa-external-link-alt', 'http://localhost:4200')
+            ->setLinkTarget('_blank');
     }
 }
