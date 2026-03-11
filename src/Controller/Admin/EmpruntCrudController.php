@@ -25,6 +25,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\Response;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class EmpruntCrudController extends AbstractCrudController
 {
@@ -188,6 +189,14 @@ class EmpruntCrudController extends AbstractCrudController
             ->hideWhenUpdating()
             ->setFormTypeOption('attr', [
                 'data-max-selection' => $maxSelection,
+            ])
+            ->setFormTypeOption('constraints', [
+                new Assert\Count([
+                    'min' => 1,
+                    'max' => 5,
+                    'minMessage' => 'Vous devez sélectionner au moins un livre.',
+                    'maxMessage' => 'Vous ne pouvez pas emprunter plus de 5 livres à la fois.',
+                ]),
             ]);
 
         $adherentField = AssociationField::new('adherent', 'Adhérent');
@@ -216,10 +225,11 @@ class EmpruntCrudController extends AbstractCrudController
             $adherentField,
             AssociationField::new('livre')
                 ->hideOnForm()
+                ->hideWhenCreating()
                 ->setLabel('Livre'),
-            $dateEmprunt->hideOnIndex(),
-            $dateRetour->hideOnIndex(),
-            $dateRetourReel->hideOnIndex(),
+            $dateEmprunt,
+            $dateRetour,
+            $dateRetourReel,
             BooleanField::new('enRetard', 'En retard')
                 ->renderAsSwitch(false)
                 ->hideOnForm(),
