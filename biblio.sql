@@ -8,7 +8,7 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 SET NAMES utf8mb4;
 
 DROP DATABASE IF EXISTS `biblio`;
-CREATE DATABASE `biblio` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE `biblio`;
 USE `biblio`;
 
 DROP TABLE IF EXISTS `adherent`;
@@ -24,7 +24,7 @@ CREATE TABLE `adherent` (
   PRIMARY KEY (`id_adh`),
   UNIQUE KEY `UNIQ_90D3F060FB88E14F` (`utilisateur_id`),
   CONSTRAINT `FK_90D3F060FB88E14F` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateur` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB;
 
 INSERT INTO `adherent` (`id_adh`, `date_adhesion`, `date_naiss`, `adresse_postale`, `num_tel`, `photo`, `utilisateur_id`, `est_actif`) VALUES
 (27,	'2024-08-05 07:50:52',	'1964-04-04',	'18, rue Valentin\n80167 Marie-les-Bains',	'0644591093',	NULL,	35,	1),
@@ -60,7 +60,7 @@ CREATE TABLE `auteur` (
   `photo` varchar(255) DEFAULT NULL,
   `description` longtext,
   PRIMARY KEY (`id_aut`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB;
 
 INSERT INTO `auteur` (`id_aut`, `nom`, `prenom`, `date_naissance`, `date_deces`, `nationalite`, `photo`, `description`) VALUES
 (11,	'Hugo',	'Victor',	'1802-02-26',	'1885-05-22',	'Française',	NULL,	'Poète, dramaturge et romancier, considéré comme l\'un des plus grands écrivains de la langue française.'),
@@ -80,7 +80,7 @@ CREATE TABLE `categorie` (
   `nom` varchar(255) NOT NULL,
   `description` longtext,
   PRIMARY KEY (`id_cat`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB ;
 
 INSERT INTO `categorie` (`id_cat`, `nom`, `description`) VALUES
 (11,	'Roman',	'Romans classiques et contemporains de la littérature française et internationale.'),
@@ -100,7 +100,7 @@ CREATE TABLE `doctrine_migration_versions` (
   `executed_at` datetime DEFAULT NULL,
   `execution_time` int DEFAULT NULL,
   PRIMARY KEY (`version`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB ;
 
 INSERT INTO `doctrine_migration_versions` (`version`, `executed_at`, `execution_time`) VALUES
 ('DoctrineMigrations\\Version20260309085231',	'2026-03-09 08:52:40',	1303),
@@ -119,7 +119,7 @@ CREATE TABLE `emprunt` (
   KEY `IDX_364071D737D925CB` (`livre_id`),
   CONSTRAINT `FK_364071D725F06C53` FOREIGN KEY (`adherent_id`) REFERENCES `adherent` (`id_adh`),
   CONSTRAINT `FK_364071D737D925CB` FOREIGN KEY (`livre_id`) REFERENCES `livre` (`id_livre`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB ;
 
 INSERT INTO `emprunt` (`id_emp`, `date_emprunt`, `date_retour`, `date_retour_reel`, `adherent_id`, `livre_id`) VALUES
 (24,	'2026-03-11 16:55:49',	'2026-03-26 16:55:49',	'2026-03-11 16:59:35',	34,	94),
@@ -139,7 +139,7 @@ CREATE TABLE `livre` (
   `photo_couverture` varchar(255) DEFAULT NULL,
   `synopsis` longtext,
   PRIMARY KEY (`id_livre`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB ;
 
 INSERT INTO `livre` (`id_livre`, `titre`, `date_sortie`, `langue`, `photo_couverture`, `synopsis`) VALUES
 (52,	'Les Misérables',	'1862-04-03 00:00:00',	'Français',	NULL,	NULL),
@@ -202,7 +202,7 @@ CREATE TABLE `livre_auteur` (
   KEY `IDX_A11876B560BB6FE6` (`auteur_id`),
   CONSTRAINT `FK_A11876B537D925CB` FOREIGN KEY (`livre_id`) REFERENCES `livre` (`id_livre`),
   CONSTRAINT `FK_A11876B560BB6FE6` FOREIGN KEY (`auteur_id`) REFERENCES `auteur` (`id_aut`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB ;
 
 INSERT INTO `livre_auteur` (`livre_id`, `auteur_id`) VALUES
 (52,	11),
@@ -265,7 +265,7 @@ CREATE TABLE `livre_categorie` (
   KEY `IDX_E61B069EBCF5E72D` (`categorie_id`),
   CONSTRAINT `FK_E61B069E37D925CB` FOREIGN KEY (`livre_id`) REFERENCES `livre` (`id_livre`),
   CONSTRAINT `FK_E61B069EBCF5E72D` FOREIGN KEY (`categorie_id`) REFERENCES `categorie` (`id_cat`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB ;
 
 INSERT INTO `livre_categorie` (`livre_id`, `categorie_id`) VALUES
 (52,	11),
@@ -348,7 +348,7 @@ CREATE TABLE `reservations` (
   KEY `IDX_4DA23925F06C53` (`adherent_id`),
   CONSTRAINT `FK_4DA23925F06C53` FOREIGN KEY (`adherent_id`) REFERENCES `adherent` (`id_adh`),
   CONSTRAINT `FK_4DA23937D925CB` FOREIGN KEY (`livre_id`) REFERENCES `livre` (`id_livre`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB ;
 
 INSERT INTO `reservations` (`id_resa`, `date_resa`, `adherent_id`, `livre_id`) VALUES
 (14,	'2026-03-11 00:00:00',	47,	54),
@@ -364,7 +364,7 @@ CREATE TABLE `utilisateur` (
   `prenom` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNIQ_IDENTIFIER_EMAIL` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB ;
 
 INSERT INTO `utilisateur` (`id`, `email`, `roles`, `password`, `nom`, `prenom`) VALUES
 (1,	'alexlolo@lolo.com',	'[\"ROLE_BIBLIO\"]',	'$2y$13$Ls5U/Z/hVVahVmjWmHaSKexPV/OLIvhDZwOxsQXoaA1yD7PPGu5Ny',	'Lovin',	'Alex'),
