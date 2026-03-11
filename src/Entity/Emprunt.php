@@ -39,12 +39,6 @@ class Emprunt
     private ?Livre $livre = null;
 
     // Représente les livres sélectionnés pour le formulaire EasyAdmin (sélection multiple)
-    #[Assert\Count(
-        min: 1, 
-        max: 5, 
-        minMessage: 'Vous devez sélectionner au moins un livre.', 
-        maxMessage: 'Vous ne pouvez pas emprunter plus de 5 livres à la fois.'
-    )]
     private ?array $livresEmpruntes = [];
 
     #[ORM\Column(nullable: true)]
