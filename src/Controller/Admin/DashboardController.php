@@ -10,6 +10,7 @@ use App\Entity\Livre;
 use App\Entity\Reservations;
 use App\Entity\Utilisateur;
 use App\Repository\EmpruntRepository;
+use App\Repository\ReservationsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -25,11 +26,15 @@ class DashboardController extends AbstractDashboardController
     public function __construct(
         private EntityManagerInterface $em,
         private EmpruntRepository $empruntRepository,
+        private ReservationsRepository $reservationsRepository,
     ) {
     }
 
     public function index(): Response
     {
+        // Purge expired reservations (older than 7 days) before loading counts
+        $this->reservationsRepository->deleteExpiredReservations();
+
         $nbAdherents = $this->em->getRepository(Adherent::class)->count([]);
         $nbAuteurs = $this->em->getRepository(Auteur::class)->count([]);
         $nbCategories = $this->em->getRepository(Categorie::class)->count([]);

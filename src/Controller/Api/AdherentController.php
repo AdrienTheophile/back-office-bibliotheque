@@ -27,7 +27,8 @@ class AdherentController extends AbstractController
         private SerializerInterface $serializer,
         private AdherentRepository $adherentRepository,
         private ReservationsRepository $reservationsRepository,
-        private LivreRepository $livreRepository
+        private LivreRepository $livreRepository,
+        private \App\Repository\EmpruntRepository $empruntRepository
     ) {
     }
 
@@ -183,6 +184,29 @@ class AdherentController extends AbstractController
             return $this->json([
                 'error' => 'Vous avez déjà réservé ce livre'
             ], Response::HTTP_CONFLICT);
+        }
+
+        // Vérifier si le livre est indisponible (déjà emprunté ou réservé par quelqu'un d'autre)
+        $unavailableBooksIds = $this->empruntRepository->findLivreNotAvailable($adherent);
+        
+        if (in_array($livre->getIdLivre(), $unavailableBooksIds)) {
+            return $this->json([
+                'error' => 'Ce livre est déjà réservé ou actuellement emprunté par un autre adhérent'
+            ], Response::HTTP_CONFLICT);
+        }
+
+        // Vérifier si l'adhérent a atteint la limite de 3 réservations
+        $activeReservationsCount = current($this->reservationsRepository->createQueryBuilder('r')
+            ->select('count(r.idResa)')
+            ->where('r.adherent = :adherent')
+            ->setParameter('adherent', $adherent)
+            ->getQuery()
+            ->getSingleResult());
+
+        if ($activeReservationsCount >= 3) {
+            return $this->json([
+                'error' => 'Vous ne pouvez pas avoir plus de 3 réservations simultanées'
+            ], Response::HTTP_FORBIDDEN);
         }
 
         $reservation = new Reservations();
