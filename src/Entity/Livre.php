@@ -232,6 +232,7 @@ class Livre
         return $this;
     }
 
+    #[Groups(['livre:read'])]
     public function isDisponible(): bool
     {
         foreach ($this->emprunts as $emprunt) {
@@ -240,6 +241,11 @@ class Livre
             }
         }
         return true;
+    }
+    #[Groups(['livre:read'])]
+    public function isReserve(): bool
+    {
+        return $this->reservations !== null;
     }
 
     public function getSynopsis(): ?string
