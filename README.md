@@ -115,3 +115,16 @@ Authorization: Bearer <votre_token>
 
 ---
 
+## 👥 Comptes de test
+
+Le dump SQL contient des utilisateurs pré-configurés  :
+
+| Rôle | Email | Mot de passe |
+|---|---|---|
+| **Administrateur** | `admin@biblio.com` | `admin` |
+| **Adhérent** | `adherent@biblio.com` | `adherent` |
+
+> **Note :** Vous pouvez également créer de nouveaux comptes comme **Bibliothécaire**,  depuis l'interface d'administration.
+
+---
+
