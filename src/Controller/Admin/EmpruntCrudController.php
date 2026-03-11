@@ -204,25 +204,34 @@ class EmpruntCrudController extends AbstractCrudController
 
             // champ multiple pour remplacer le champ de livre de base 
             $livresField,
-
-            DateField::new('dateEmprunt', "Date d'emprunt")
-                ->setFormat('dd/MM/yyyy')
-                ->setFormTypeOption('data', new \DateTime())
-                ->setFormTypeOption('disabled', true),
-            
-            DateField::new('dateRetour', 'Date limite retour')
-                ->setFormat('dd/MM/yyyy')
-                ->setFormTypeOption('data', new \DateTime('+15 days'))
-                ->setFormTypeOption('disabled', true), //15 jours avant de considerer comme un retard
-            
-            DateField::new('dateRetourReel', 'Date de retour effectif')
-                ->setFormat('dd/MM/yyyy')
-                ->hideOnForm(), // On gère le retour via une action ou on l'affiche seulement en lecture
-
-            BooleanField::new('enRetard', 'En retard')
-                ->renderAsSwitch(false)
-                ->hideOnForm(),
         ];
+
+        $dateEmprunt = DateField::new('dateEmprunt', "Date d'emprunt")->setFormat('dd/MM/yyyy');
+        $dateRetour = DateField::new('dateRetour', 'Date limite retour')->setFormat('dd/MM/yyyy');
+        $dateRetourReel = DateField::new('dateRetourReel', 'Date de retour effectif')->setFormat('dd/MM/yyyy');
+
+        if ($pageName === Crud::PAGE_NEW) {
+            $dateEmprunt->setFormTypeOption('data', new \DateTime())->setFormTypeOption('disabled', true);
+            $dateRetour->setFormTypeOption('data', new \DateTime('+15 days'))->setFormTypeOption('disabled', true);
+            $dateRetourReel->hideOnForm();
+        } elseif ($pageName === Crud::PAGE_EDIT) {
+            // Un admin (seul autorisé à voir PAGE_EDIT théoriquement) peut modifier.
+            // La validation des entités s'occupe des contrôles.
+            $dateEmprunt->setRequired(true);
+            $dateRetour->setRequired(true);
+            $dateRetourReel->setRequired(false);
+        } else {
+            $dateRetourReel->hideOnForm();
+        }
+
+        $fields[] = $dateEmprunt;
+        $fields[] = $dateRetour;
+        $fields[] = $dateRetourReel;
+        $fields[] = BooleanField::new('enRetard', 'En retard')
+                ->renderAsSwitch(false)
+                ->hideOnForm();
+                
+        return $fields;
     }
 
     public function configureFilters(Filters $filters): Filters 

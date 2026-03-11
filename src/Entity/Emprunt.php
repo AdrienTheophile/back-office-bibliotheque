@@ -19,10 +19,13 @@ class Emprunt
 
     #[ORM\Column]
     #[Groups(['emprunt:read', 'adherent:read'])]
+    #[Assert\NotBlank(message: 'La date d\'emprunt est obligatoire.')]
     private ?\DateTime $dateEmprunt = null;
 
     #[ORM\Column]
     #[Groups(['emprunt:read', 'adherent:read'])]
+    #[Assert\NotBlank(message: 'La date de retour prévue est obligatoire.')]
+    #[Assert\GreaterThan(propertyPath: "dateEmprunt", message: "La date de retour prévue doit être strictement supérieure à la date d'emprunt.")]
     private ?\DateTime $dateRetour = null;
 
     #[ORM\ManyToOne(inversedBy: 'emprunts')]
@@ -45,6 +48,7 @@ class Emprunt
     private ?array $livresEmpruntes = [];
 
     #[ORM\Column(nullable: true)]
+    #[Assert\GreaterThanOrEqual(propertyPath: "dateEmprunt", message: "La date de retour réel doit être égale ou supérieure à la date d'emprunt.")]
     private ?\DateTime $dateRetourReel = null;
 
     public function getLivresEmpruntes(): ?array
