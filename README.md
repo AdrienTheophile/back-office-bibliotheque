@@ -115,7 +115,7 @@ Authorization: Bearer <votre_token>
 
 ---
 
-## 👥 Comptes de test
+## Comptes de test
 
 Le dump SQL contient des utilisateurs pré-configurés  :
 
