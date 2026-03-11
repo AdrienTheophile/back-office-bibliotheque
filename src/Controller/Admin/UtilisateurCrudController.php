@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
@@ -67,9 +68,14 @@ class UtilisateurCrudController extends AbstractCrudController
             $entityInstance->setPassword(
                 $this->passwordHasher->hashPassword($entityInstance, $entityInstance->getPlainPassword())
             );
-            $entityInstance->eraseCredentials(); // Bonne pratique
+            $entityInstance->eraseCredentials();
         }
-        parent::persistEntity($entityManager, $entityInstance);
+
+        try {
+            parent::persistEntity($entityManager, $entityInstance);
+        } catch (UniqueConstraintViolationException $e) {
+            $this->addFlash('danger', 'Cette adresse e-mail est déjà utilisée par un autre compte.');
+        }
     }
 
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
@@ -80,6 +86,11 @@ class UtilisateurCrudController extends AbstractCrudController
             );
             $entityInstance->eraseCredentials();
         }
-        parent::updateEntity($entityManager, $entityInstance);
+
+        try {
+            parent::updateEntity($entityManager, $entityInstance);
+        } catch (UniqueConstraintViolationException $e) {
+            $this->addFlash('danger', 'Cette adresse e-mail est déjà utilisée par un autre compte.');
+        }
     }
 }

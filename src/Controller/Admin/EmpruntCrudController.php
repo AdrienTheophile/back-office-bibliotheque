@@ -195,17 +195,6 @@ class EmpruntCrudController extends AbstractCrudController
             $adherentField->setFormTypeOption('disabled', true);
         }
 
-        return [
-            IdField::new('idEmp', 'ID')->hideOnForm()->hideOnIndex(),
-            $adherentField,
-            AssociationField::new('livre')
-                ->hideOnForm() 
-                ->setLabel('Livre'),
-
-            // champ multiple pour remplacer le champ de livre de base 
-            $livresField,
-        ];
-
         $dateEmprunt = DateField::new('dateEmprunt', "Date d'emprunt")->setFormat('dd/MM/yyyy');
         $dateRetour = DateField::new('dateRetour', 'Date limite retour')->setFormat('dd/MM/yyyy');
         $dateRetourReel = DateField::new('dateRetourReel', 'Date de retour effectif')->setFormat('dd/MM/yyyy');
@@ -215,8 +204,6 @@ class EmpruntCrudController extends AbstractCrudController
             $dateRetour->setFormTypeOption('data', new \DateTime('+15 days'))->setFormTypeOption('disabled', true);
             $dateRetourReel->hideOnForm();
         } elseif ($pageName === Crud::PAGE_EDIT) {
-            // Un admin (seul autorisé à voir PAGE_EDIT théoriquement) peut modifier.
-            // La validation des entités s'occupe des contrôles.
             $dateEmprunt->setRequired(true);
             $dateRetour->setRequired(true);
             $dateRetourReel->setRequired(false);
@@ -224,14 +211,22 @@ class EmpruntCrudController extends AbstractCrudController
             $dateRetourReel->hideOnForm();
         }
 
-        $fields[] = $dateEmprunt;
-        $fields[] = $dateRetour;
-        $fields[] = $dateRetourReel;
-        $fields[] = BooleanField::new('enRetard', 'En retard')
+        return [
+            IdField::new('idEmp', 'ID')->hideOnForm()->hideOnIndex(),
+            $adherentField,
+            AssociationField::new('livre')
+                ->hideOnForm()
+                ->setLabel('Livre'),
+            $dateEmprunt,
+            $dateRetour,
+            $dateRetourReel,
+            BooleanField::new('enRetard', 'En retard')
                 ->renderAsSwitch(false)
-                ->hideOnForm();
-                
-        return $fields;
+                ->hideOnForm(),
+
+            // champ multiple pour remplacer le champ de livre de base
+            $livresField,
+        ];
     }
 
     public function configureFilters(Filters $filters): Filters 

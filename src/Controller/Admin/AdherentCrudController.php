@@ -8,6 +8,7 @@ use App\Entity\Reservations;
 use App\Entity\Utilisateur;
 use App\Repository\EmpruntRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -312,7 +313,12 @@ class AdherentCrudController extends AbstractCrudController
                 }
             }
         }
-        parent::persistEntity($entityManager, $entityInstance);
+
+        try {
+            parent::persistEntity($entityManager, $entityInstance);
+        } catch (UniqueConstraintViolationException $e) {
+            $this->addFlash('danger', 'Cette adresse e-mail est déjà utilisée par un autre compte.');
+        }
     }
 
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
@@ -328,6 +334,11 @@ class AdherentCrudController extends AbstractCrudController
                 $utilisateur->eraseCredentials();
             }
         }
-        parent::updateEntity($entityManager, $entityInstance);
+
+        try {
+            parent::updateEntity($entityManager, $entityInstance);
+        } catch (UniqueConstraintViolationException $e) {
+            $this->addFlash('danger', 'Cette adresse e-mail est déjà utilisée par un autre compte.');
+        }
     }
 }
