@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AdherentRepository::class)]
 class Adherent
@@ -37,6 +38,11 @@ class Adherent
 
     #[ORM\Column(length: 13)]
     #[Groups(['adherent:read'])]
+    #[Assert\NotBlank(message: 'Le numéro de téléphone est obligatoire.')]
+    #[Assert\Regex(
+        pattern: '/^\d{10}$/',
+        message: 'Le numéro de téléphone doit contenir exactement 10 chiffres (ex : 0612345678).'
+    )]
     private ?string $numTel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
